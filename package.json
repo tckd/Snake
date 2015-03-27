@@ -19,6 +19,10 @@
   ],
   "author": "Habibollah Hosseinpoor",
   "license": "ISC",
+  "dependencies": {
+    "express": "^4.12.3",
+    "socket.io": "^1.3.5"
+  },
   "bugs": {
     "url": "https://github.com/tckd/SnakeRide/issues"
   },

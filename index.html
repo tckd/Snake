@@ -1,0 +1,268 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Snake</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <!--script src="https://cdn.me.io/me.io-1.3.5.js"></script-->
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+  </head>
+  <body>
+    <table id="players">
+      <thead>
+        <tr>
+          <td>Client</td>
+          <td>Status</td>
+          <td>Direction</td>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <canvas id="canvas"></canvas>
+  </body>
+
+<script>
+$( document ).ready(function() {
+  var canvas = $("#canvas")[0];
+  var ctx = canvas.getContext("2d");
+  var w = 10;
+  var h = 10;
+  var cw = 20;
+  canvas.width = w*cw;
+  canvas.height = h*cw;
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, w*cw, h*cw);
+  ctx.strokeStyle = "black";
+  ctx.strokeRect(0, 0, w*cw, h*cw);
+
+  var me = io();
+
+  var started = false;
+  var players = [];
+  var cells = [];
+  var game_loop;
+
+  function run() {
+    moveAllLivePlayers();
+    paint();
+  }
+
+  function moveAllLivePlayers() {
+    for(var i = 0; i < players.length; i++){
+      var p = players[i];
+      if(p.s=="Ready"){ // paint only live players
+        move(p);
+        if(p.id==me.id){ // only broadcast my collision
+          console.log("My id: "+me.id);
+          if(checkCollision(p)){
+            me.emit('crashed');
+          }
+        }
+        cells.push({"x": p.c.x, "y": p.c.y});
+      }
+    }
+  }
+
+  function move(player) {
+    if(player.d == "right"){
+      player.c.x++;
+    } else if(player.d == "left"){
+      player.c.x--;
+    } else if(player.d == "up"){
+      player.c.y--;
+    } else if(player.d == "down") {
+      player.c.y++;
+    }
+  }
+
+  function checkCollision(player) {
+    var x = player.c.x;
+    var y = player.c.y;
+    if(x == -1 || x == w || y == -1 || y == h){
+      return true;
+    }
+
+    for(var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      if(c.x == x && c.y == y){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function paint() {
+    for(var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      paintCell(c.x, c.y);
+    }
+  }
+
+  function paintCell(x, y) {
+    ctx.fillStyle = "blue";
+    ctx.fillRect(x*cw, y*cw, cw, cw);
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(x*cw, y*cw, cw, cw);
+  }
+
+  function exists(playerID){
+    for(var i = 0; i<players.length; i++){
+      if(players[i].id==playerID) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function findPlayer(playerID){
+    for(var i = 0; i<players.length; i++){
+      if(players[i].id==playerID) {
+        return players[i];
+      }
+    }
+    return;
+  }
+
+  function won(){
+    var nrLivePlayers = 0;
+    for(var i = 0; i<players.length; i++){
+      if(players[i].s=="Ready"){
+        nrLivePlayers++;
+      }
+    }
+    if(nrLivePlayers==1){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function winner(){
+    for(var i = 0; i<players.length; i++){
+      if(players[i].s=="Ready"){
+        return players[i];
+      }
+    }
+    return {};
+  }
+
+  $(document).keydown(function(e){
+    var key = e.which;
+    if(key == "83" && exists(me.id) && !started){ // s
+      me.emit('ready');
+    } else if(key == "76"){ // l
+      me.emit('list');
+    } else if(key == "37" && exists(me.id) && findPlayer(me.id).d != "right" && started){
+      me.emit('changeDirection', "left");
+    } else if(key == "38" && exists(me.id) && findPlayer(me.id).d != "down" && started){
+      me.emit('changeDirection', "up");
+    } else if(key == "39" && exists(me.id) && findPlayer(me.id).d != "left" && started){
+      me.emit('changeDirection', "right");
+    } else if(key == "40" && exists(me.id) && findPlayer(me.id).d != "up" && started){
+      me.emit('changeDirection', "down");
+    }
+  });
+
+//-------------------
+// communications
+//-------------------
+
+  me.on('connect', function() {
+    // Request list of players from server
+    me.emit('historic');
+    console.log("You'r connected: "+me.id);
+  });
+
+  me.on('init'+me.id, function(msg){
+    console.log("Secret communication");
+    players = msg;
+    $("#players > tbody").empty();
+    for(var i = 0; i < players.length; i++){
+      $("#players > tbody").append($('<tr id=\"'+msg[i].id+'\">')
+        .append($('<td id="cID">').append(msg[i].id))
+        .append($('<td id="cS">').append(msg[i].s))
+        .append($('<td id="cD">').append(msg[i].d))
+      );
+    }
+  });
+
+  me.on('join', function(player){
+    if(!started && !exists(player.id)){
+      players.push(player);
+      $("#players > tbody").append($('<tr id=\"'+player.id+'\">')
+        .append($('<td id="cID">').append(player.id))
+        .append($('<td id="cS">').append(player.s))
+        .append($('<td id="cD">').append(player.d))
+      );
+
+    }
+  });
+
+  me.on('ready', function(player){
+    if(!started && exists(player.id)){
+      var p = findPlayer(player.id);
+      p.s = player.s;
+      $("#"+p.id+" cS").val(p.s);
+    }
+  });
+
+  me.on('start', function(){
+    if(!started){
+      console.log("Game started!");
+      game_loop = setInterval(run, 1000);
+      started=true
+    }
+  });
+
+  me.on('changeDirection', function(player){
+    if(started && exists(player.id)){
+      var p = findPlayer(player.id);
+      p.d = player.d;
+      $("#"+p.id+" cD").val(p.d);
+    }
+  });
+
+  me.on('crashed', function(player){
+    if(started && exists(player.id)){
+      var p = findPlayer(player.id);
+      p.s = player.s;
+      $("#"+p.id+" cS").val(p.s);
+      if(won() && winner().id == me.id){
+        me.emit('winner');
+      }
+    }
+  });
+
+  me.on('winner', function(player){
+    if(started && exists(player.id)){
+      var p = findPlayer(player.id);
+      p.s = player.s;
+      clearInterval(game_loop);
+      started=false;
+      $("#"+p.id+" cS").val(p.s);
+    }
+  });
+
+  me.on('connectionLost', function(player){
+    if(exists(player.id)){
+      var p = findPlayer(player.id);
+      p.s = "Disconnected";
+      $("#"+p.id+" cS").val(p.s);
+    }
+  });
+
+  me.on('list', function(msg){
+    //console.log("List of players recieved "+JSON.stringify(msg));
+    $("#players > tbody").empty();
+    for(var i = 0; i < players.length; i++){
+      $("#players > tbody").append($('<tr id=\"'+msg[i].id+'\">')
+        .append($('<td id="cID">').append(msg[i].id))
+        .append($('<td id="cS">').append(msg[i].s))
+        .append($('<td id="cD">').append(msg[i].d))
+      );
+    }
+  });
+
+});
+</script>
+</html>
