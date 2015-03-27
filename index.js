@@ -57,41 +57,44 @@ function findPlayer(playerID){
 function init(){
   for(var i = 0; i<players.length; i++){
     players[i].s="Init";
+    players[i].c={'x':2,'y':i*2+2};
   }
 }
 
 
 io.on('connection', function(client){
-  console.log('Player with id '+client.id+' is connected');
-  var player = createPlayer(client.id);
-  players.push(player);
-  io.emit('join', player);
+  if(!exists(client.id)){
+    console.log('Player with id '+client.id+' is connected');
+    var player = createPlayer(client.id);
+    players.push(player);
+    io.emit('join', player);
+  }
 
-  client.on('historic', function(){
+  client.on('history', function(){
     // Send list of players (historic data)
-    io.emit('init'+client.id, players);
+    io.emit('history', {"playerID": client.id, 'players':players});
   });
 
-
   client.on('disconnect', function(){
-    console.log('Player with id '+client.id+' is disconnected');
+    console.log('Player with id '+client.id+' is disconnected!');
     var player = createPlayer(client.id);
+    player.s="Disconnected";
     removePlayer(client.id);
     io.emit('connectionLost', player);
   });
 
   client.on('changeDirection', function(direction){
     if(exists(client.id)){
+      console.log('Player with id '+client.id+' changed direction to '+direction);
       var player = findPlayer(client.id);
       player.d = direction;
-      //console.log('Player with id '+client.id+' is changed direction '+ player.d);
       io.emit('changeDirection', player);
     }
   });
 
   client.on('winner', function(){
     if(exists(client.id)){
-      console.log('Player with id '+client.id+' won!');
+      console.log('Player with id '+client.id+' Won!');
       var player = findPlayer(client.id);
       player.s = "Won";
       io.emit('winner', player);
@@ -101,9 +104,11 @@ io.on('connection', function(client){
 
   client.on('crashed', function(){
     if(exists(client.id)){
-      console.log('Player with id '+client.id+' crashed!');
+      console.log('Player with id '+client.id+' has Crashed!');
       var player = findPlayer(client.id);
       player.s = "Dead";
+
+      console.log(JSON.stringify(player));
       io.emit('crashed', player);
     }
   });
@@ -111,15 +116,13 @@ io.on('connection', function(client){
   // start a new game when all the players are ready
   client.on('ready', function () {
     if(exists(client.id)){
+      console.log('Player with id '+client.id+' is Ready!');
       var p = findPlayer(client.id);
       p.s = "Ready";
       io.emit('ready',p);
-      console.log(p.id+" is ready");
-
       if(isAllPlayerReady()){
-        io.emit('start'); // broadcast the start to all the players
+        io.emit('start');
       }
-
     }
   });
 

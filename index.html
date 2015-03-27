@@ -28,19 +28,23 @@ $( document ).ready(function() {
   var w = 10;
   var h = 10;
   var cw = 20;
-  canvas.width = w*cw;
-  canvas.height = h*cw;
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, w*cw, h*cw);
-  ctx.strokeStyle = "black";
-  ctx.strokeRect(0, 0, w*cw, h*cw);
 
+  paintWorld();
   var me = io();
-
-  var started = false;
   var players = [];
   var cells = [];
+  var started = false;
   var game_loop;
+
+  function paintWorld(){
+    canvas.width = w*cw;
+    canvas.height = h*cw;
+
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, w*cw, h*cw);
+    ctx.strokeStyle = "black";
+    ctx.strokeRect(0, 0, w*cw, h*cw);
+  }
 
   function run() {
     moveAllLivePlayers();
@@ -53,7 +57,6 @@ $( document ).ready(function() {
       if(p.s=="Ready"){ // paint only live players
         move(p);
         if(p.id==me.id){ // only broadcast my collision
-          console.log("My id: "+me.id);
           if(checkCollision(p)){
             me.emit('crashed');
           }
@@ -163,38 +166,51 @@ $( document ).ready(function() {
     }
   });
 
+  function updateView(players){
+    $("#players > tbody").empty();
+    for(var i = 0; i < players.length; i++){
+      $("#players > tbody").append($('<tr>')
+        .append($('<td id=\"'+players[i].id+' cID\">').append(players[i].id))
+        .append($('<td id=\"'+players[i].id+' cS\">').append(players[i].s))
+        .append($('<td id=\"'+players[i].id+' cD\">').append(players[i].d))
+      );
+    }
+  }
+
+  function addView(player){
+    $("#players > tbody").append($('<tr>')
+      .append($('<td id=\"'+player.id+' cID\">').append(player.id))
+      .append($('<td id=\"'+player.id+' cS\">').append(player.s))
+      .append($('<td id=\"'+player.id+' cD\">').append(player.d))
+    );
+  }
+
+
 //-------------------
 // communications
 //-------------------
 
   me.on('connect', function() {
-    // Request list of players from server
-    me.emit('historic');
+    me.emit('history');
     console.log("You'r connected: "+me.id);
   });
 
-  me.on('init'+me.id, function(msg){
-    console.log("Secret communication");
+  me.on('init', function(msg){
     players = msg;
-    $("#players > tbody").empty();
-    for(var i = 0; i < players.length; i++){
-      $("#players > tbody").append($('<tr id=\"'+msg[i].id+'\">')
-        .append($('<td id="cID">').append(msg[i].id))
-        .append($('<td id="cS">').append(msg[i].s))
-        .append($('<td id="cD">').append(msg[i].d))
-      );
+    updateView(players);
+  });
+
+  me.on('history', function(msg){
+    if(me.id==msg.playerID){
+      players = msg.players;
+      updateView(players);
     }
   });
 
   me.on('join', function(player){
     if(!started && !exists(player.id)){
       players.push(player);
-      $("#players > tbody").append($('<tr id=\"'+player.id+'\">')
-        .append($('<td id="cID">').append(player.id))
-        .append($('<td id="cS">').append(player.s))
-        .append($('<td id="cD">').append(player.d))
-      );
-
+      addView(player);
     }
   });
 
@@ -209,6 +225,7 @@ $( document ).ready(function() {
   me.on('start', function(){
     if(!started){
       console.log("Game started!");
+      paintWorld();
       game_loop = setInterval(run, 1000);
       started=true
     }
@@ -237,30 +254,23 @@ $( document ).ready(function() {
     if(started && exists(player.id)){
       var p = findPlayer(player.id);
       p.s = player.s;
-      clearInterval(game_loop);
-      started=false;
       $("#"+p.id+" cS").val(p.s);
+      clearInterval(game_loop);
+      var cells = [];
+      var started = false;
     }
   });
 
   me.on('connectionLost', function(player){
     if(exists(player.id)){
       var p = findPlayer(player.id);
-      p.s = "Disconnected";
-      $("#"+p.id+" cS").val(p.s);
+      p.s = player.s;
+      $("#"+p.id+" #cS").val(p.s);
     }
   });
 
   me.on('list', function(msg){
-    //console.log("List of players recieved "+JSON.stringify(msg));
-    $("#players > tbody").empty();
-    for(var i = 0; i < players.length; i++){
-      $("#players > tbody").append($('<tr id=\"'+msg[i].id+'\">')
-        .append($('<td id="cID">').append(msg[i].id))
-        .append($('<td id="cS">').append(msg[i].s))
-        .append($('<td id="cD">').append(msg[i].d))
-      );
-    }
+    updateView(msg);
   });
 
 });
