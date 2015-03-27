@@ -1,0 +1,26 @@
+{
+  "name": "SnakeRide",
+  "version": "1.0.0",
+  "description": "A multiplayer Snake/Ride game",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/tckd/SnakeRide"
+  },
+  "keywords": [
+    "Snake",
+    "Ride",
+    "Node",
+    "Websocket",
+    "Multiplayer"
+  ],
+  "author": "Habibollah Hosseinpoor",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tckd/SnakeRide/issues"
+  },
+  "homepage": "https://github.com/tckd/SnakeRide"
+}
