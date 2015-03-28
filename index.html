@@ -188,16 +188,31 @@ $( document ).ready(function() {
   function update(snakes){
     $("#snakes").empty();
     for(var i = 0; i < snakes.length; i++){
-      $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"snake-direction\">- '+snakes[i].d+'</span></a>'));
+      if(snakes[i].id==me.id){
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"snake-direction\">- '+snakes[i].d+'</span></a>'));
+      } else {
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"snake-direction\">- '+snakes[i].d+'</span></a>'));
+      }
     }
   }
 
   function addSnake(s){
-    $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>'));
+    if(s.id==me.id){
+      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>'));
+    } else {
+      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>'));
+    }
+
+
+
   }
 
   function updateSnake(s){
-    $('#'+s.id).val('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>');
+    if(s.id==me.id){
+      $('#'+s.id).replaceWith('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>');
+    } else {
+      $('#'+s.id).replaceWith('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>');
+    }
   }
 
 //-------------------
