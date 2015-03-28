@@ -31,13 +31,15 @@ http://localhost:3000
 
   To command your snake use the following keys
 
-  s - Start
-  l - Request list of players
-  n - Request new game
-  up - Change snake direction up
-  down - Change snake direction down
-  left - Change snake direction left
-  right - Change snake direction right
+```command
+s - Start
+l - Request list of players
+n - Request new game
+up - Change snake direction up
+down - Change snake direction down
+left - Change snake direction left
+right - Change snake direction right
+```
 
 ## License
 
