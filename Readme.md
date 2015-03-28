@@ -32,8 +32,9 @@ http://localhost:3000
   To command your snake use the following keys
 
 ```command
-s - Start
-l - Request list of players
+9 - Start
+8 - Request list of players
+7 - Request list of waiting players (not implemented)
 n - Request new game
 up - Change snake direction up
 down - Change snake direction down
