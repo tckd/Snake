@@ -16,7 +16,7 @@
     <div id="layout" class="content pure-g">
       <div id="nav" class="pure-u">
         <!--a href="#" class="nav-menu-button">tckd</a-->
-        <button class="primary-button pure-button">Start</button>
+        <button id="start" class="primary-button pure-button">Start</button>
           <div class="pure-menu">
             <ul id="snakes" class="pure-menu-list">
               <!--li id="snakeUniqueId">
@@ -46,8 +46,8 @@
 $( document ).ready(function() {
   var canvas = $("#canvas")[0];
   var ctx = canvas.getContext("2d");
-  var w = 70;
-  var h = 70;
+  var w = 100;
+  var h = 100;
   var cw = 5;
 
   var me = io();
@@ -180,23 +180,6 @@ $( document ).ready(function() {
     return {};
   }
 
-  $(document).keydown(function(e){
-    var key = e.which;
-    if(key == "83" && exists(me.id) && !started){ // s
-      me.emit('ready');
-    } else if(key == "76"){ // l
-      me.emit('snakes');
-    } else if(key == "37" && !dead(me.id) && findSnake(me.id).d != "right" && started){
-      me.emit('changeDirection', "left");
-    } else if(key == "38" && !dead(me.id) && findSnake(me.id).d != "down" && started){
-      me.emit('changeDirection', "up");
-    } else if(key == "39" && !dead(me.id) && findSnake(me.id).d != "left" && started){
-      me.emit('changeDirection', "right");
-    } else if(key == "40" && !dead(me.id) && findSnake(me.id).d != "up" && started){
-      me.emit('changeDirection', "down");
-    }
-  });
-
   function update(snakes){
     paintWorld();
     $("#snakes").empty();
@@ -226,6 +209,30 @@ $( document ).ready(function() {
       $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.n+' <span class=\"direction\">- '+s.d+'</span></a>');
     }
   }
+
+  $(document).keydown(function(e){
+    var key = e.which;
+    if(key == "57" && exists(me.id) && !started){ // 9 - start
+      me.emit('ready');
+    } else if(key == "56"){ // 8 - get list of snakes
+      me.emit('snakes');
+    } else if(key == "37" && !dead(me.id) && findSnake(me.id).d != "right" && started){
+      me.emit('changeDirection', "left");
+    } else if(key == "38" && !dead(me.id) && findSnake(me.id).d != "down" && started){
+      me.emit('changeDirection', "up");
+    } else if(key == "39" && !dead(me.id) && findSnake(me.id).d != "left" && started){
+      me.emit('changeDirection', "right");
+    } else if(key == "40" && !dead(me.id) && findSnake(me.id).d != "up" && started){
+      me.emit('changeDirection', "down");
+    }
+  });
+
+  $('#start').click(function(){
+    if(exists(me.id) && !started){
+      me.emit('ready');
+    }
+  });
+
 //-------------------
 // communications
 //-------------------
