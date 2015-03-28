@@ -19,7 +19,7 @@ var started = false;
 
 function createSnake(id){
   var cp = snakes.length*2+2;
-  return {"id":id, "d":"right", "s":"init", "c":{"x":2,"y":cp}};
+  return {"id":id, "n":id.substr(0, 9), "d":"right", "s":"init", "c":{"x":2,"y":cp}};
 }
 
 function init(){
@@ -113,6 +113,13 @@ io.on('connection', function(client){
     snake.s="disconnected";
     removeSnake(client.id); // Remove from both list
     io.emit('connectionLost', snake);
+  });
+
+  client.on('name', function(name){
+    console.log('Snake with id '+client.id+' changed name to '+name);
+    var snake = findSnake(client.id);
+    snake.n = name;
+    io.emit('name', snake);
   });
 
   client.on('changeDirection', function(direction){

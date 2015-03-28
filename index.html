@@ -9,11 +9,12 @@
     <script src="/socket.io/socket.io.js"></script>
     <!--script src="https://cdn.me.io/me.io-1.3.5.js"></script-->
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="js/jquery.leanModal.min.js"></script>
   </head>
   <body>
     <div id="layout" class="content pure-g">
       <div id="nav" class="pure-u">
-        <!--a href="#" class="nav-menu-button">Snake/Ride</a-->
+        <a href="#signup" id="nameBox" class="nav-menu-button">Change name</a>
         <button class="primary-button pure-button">Start</button>
           <div class="pure-menu">
             <ul id="snakes" class="pure-menu-list">
@@ -36,11 +37,18 @@
           </div>
       </div>
       <div id="main" class="pure-u-1">
+        <div id="signup">
+          <input id="name" type="text" placeholder="Name">
+          <button id="changeName" class="primary-button pure-button">Change</button>
+        </div>
         <canvas id="canvas"></canvas>
       </div>
     </div>
   </body>
 <script>
+
+$("#nameBox").leanModal({ top : 200, overlay : 0.4, closeButton: ".modal_close" });
+
 $( document ).ready(function() {
   var canvas = $("#canvas")[0];
   var ctx = canvas.getContext("2d");
@@ -200,9 +208,10 @@ $( document ).ready(function() {
     $("#snakes").empty();
     for(var i = 0; i < snakes.length; i++){
       if(snakes[i].id==me.id){
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].n+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
+        $('#name').val(snakes[i].n);
       } else {
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].n+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
       }
     }
   }
@@ -210,20 +219,28 @@ $( document ).ready(function() {
   function addSnake(s){
     paintWorld();
     if(s.id==me.id){
-      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
+      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.n+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
+      $('#name').val(s.n);
     } else {
-      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
+      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.n+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
     }
   }
 
   function updateSnake(s){
     //paintWorld();
     if(s.id==me.id){
-      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>');
+      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.n+' <span class=\"direction\">- '+s.d+'</span></a>');
+      $('#name').val(s.n);
     } else {
-      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>');
+      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.n+' <span class=\"direction\">- '+s.d+'</span></a>');
     }
   }
+
+  $( "#changeName" ).click(function() {
+    var s = findSnake(me.id);
+    s.n = $('#name').val();
+    me.emit('name',s.n);
+  });
 
 //-------------------
 // communications
@@ -245,6 +262,14 @@ $( document ).ready(function() {
     if(!started && exists(snake.id)){
       var s = findSnake(snake.id);
       s.s = snake.s;
+      updateSnake(s);
+    }
+  });
+
+  me.on('name', function(snake){
+    if(exists(snake.id)){
+      var s = findSnake(snake.id);
+      s.n = snake.n;
       updateSnake(s);
     }
   });
@@ -309,5 +334,6 @@ $( document ).ready(function() {
     }
   });
 });
+
 </script>
 </html>
