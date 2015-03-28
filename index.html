@@ -18,19 +18,19 @@
           <div class="pure-menu">
             <ul id="snakes" class="pure-menu-list">
               <!--li id="snakeUniqueId">
-                <a href="#" class="pure-menu-link me snake-init">Init <span class="snake-direction">- left</span></a>
+                <a href="#" class="pure-menu-link me init">Snake 1 <span class="direction">- left</span></a>
               </li>
               <li id="snakeUniqueId">
-                <a href="#" class="pure-menu-link snake-ready">Ready <span class="snake-direction">- left</span></a>
+                <a href="#" class="pure-menu-link ready">Snake 2 <span class="direction">- left</span></a>
               </li>
               <li id="snakeUniqueId">
-                <a href="#" class="pure-menu-link snake-dead">Dead <span class="snake-direction">- left</span></a>
+                <a href="#" class="pure-menu-link dead">Snake 3 <span class="direction">- left</span></a>
               </li>
               <li id="snakeUniqueId">
-                <a href="#" class="pure-menu-link snake-won">Won <span class="snake-direction">- left</span></a>
+                <a href="#" class="pure-menu-link won">Snake 4 <span class="direction">- left</span></a>
               </li>
               <li id="snakeUniqueId">
-                <a href="#" class="pure-menu-link snake-disconnected">Disconnected</a>
+                <a href="#" class="pure-menu-link disconnected">Snake 5</a>
               </li-->
             </ul>
           </div>
@@ -44,16 +44,16 @@
 $( document ).ready(function() {
   var canvas = $("#canvas")[0];
   var ctx = canvas.getContext("2d");
-  var w = 20;
-  var h = 20;
-  var cw = 20;
+  var w = 70;
+  var h = 70;
+  var cw = 5;
 
-  paintWorld();
   var me = io();
   var snakes = [];
   var cells = [];
   var started = false;
-  var game_loop;
+  var loop;
+  var counter = 0;
 
   function paintWorld(){
     canvas.width = w*cw;
@@ -66,6 +66,7 @@ $( document ).ready(function() {
   }
 
   function run() {
+    console.log(counter++);
     moveAllLiveSnakes();
     paint();
   }
@@ -73,7 +74,7 @@ $( document ).ready(function() {
   function moveAllLiveSnakes() {
     for(var i = 0; i < snakes.length; i++){
       var p = snakes[i];
-      if(p.s=="Ready"){ // paint only live snakes
+      if(p.s=="ready"){ // paint only live snakes
         move(p);
         if(p.id==me.id){ // only broadcast my collision
           if(checkCollision(p)){
@@ -136,6 +137,15 @@ $( document ).ready(function() {
     return false;
   }
 
+  function dead(snakeID){
+    for(var i = 0; i<snakes.length; i++){
+      if(snakes[i].id==snakeID && snakes[i].s=="dead") {
+        return true;
+      }
+    }
+    return false;
+  }
+
   function findSnake(snakeID){
     for(var i = 0; i<snakes.length; i++){
       if(snakes[i].id==snakeID) {
@@ -148,7 +158,7 @@ $( document ).ready(function() {
   function won(){
     var nrLiveSnakes = 0;
     for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].s=="Ready"){
+      if(snakes[i].s=="ready"){
         nrLiveSnakes++;
       }
     }
@@ -161,7 +171,7 @@ $( document ).ready(function() {
 
   function winner(){
     for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].s=="Ready"){
+      if(snakes[i].s=="ready"){
         return snakes[i];
       }
     }
@@ -173,45 +183,45 @@ $( document ).ready(function() {
     if(key == "83" && exists(me.id) && !started){ // s
       me.emit('ready');
     } else if(key == "76"){ // l
-      me.emit('list');
-    } else if(key == "37" && exists(me.id) && findSnake(me.id).d != "right" && started){
+      me.emit('snakes');
+    } else if(key == "37" && !dead(me.id) && findSnake(me.id).d != "right" && started){
       me.emit('changeDirection', "left");
-    } else if(key == "38" && exists(me.id) && findSnake(me.id).d != "down" && started){
+    } else if(key == "38" && !dead(me.id) && findSnake(me.id).d != "down" && started){
       me.emit('changeDirection', "up");
-    } else if(key == "39" && exists(me.id) && findSnake(me.id).d != "left" && started){
+    } else if(key == "39" && !dead(me.id) && findSnake(me.id).d != "left" && started){
       me.emit('changeDirection', "right");
-    } else if(key == "40" && exists(me.id) && findSnake(me.id).d != "up" && started){
+    } else if(key == "40" && !dead(me.id) && findSnake(me.id).d != "up" && started){
       me.emit('changeDirection', "down");
     }
   });
 
   function update(snakes){
+    paintWorld();
     $("#snakes").empty();
     for(var i = 0; i < snakes.length; i++){
       if(snakes[i].id==me.id){
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"snake-direction\">- '+snakes[i].d+'</span></a>'));
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
       } else {
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"snake-direction\">- '+snakes[i].d+'</span></a>'));
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].id+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
       }
     }
   }
 
   function addSnake(s){
+    paintWorld();
     if(s.id==me.id){
-      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>'));
+      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
     } else {
-      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>'));
+      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
     }
-
-
-
   }
 
   function updateSnake(s){
+    //paintWorld();
     if(s.id==me.id){
-      $('#'+s.id).replaceWith('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>');
+      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>');
     } else {
-      $('#'+s.id).replaceWith('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"snake-direction\">- '+s.d+'</span></a>');
+      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>');
     }
   }
 
@@ -223,7 +233,6 @@ $( document ).ready(function() {
   });
 
   me.on('join', function(msg){
-
     if(!started){
       snakes = msg;
       update(snakes);
@@ -244,7 +253,7 @@ $( document ).ready(function() {
     if(!started){
       console.log("Game started!");
       paintWorld();
-      game_loop = setInterval(run, 1000);
+      loop = setInterval(run, 100);
       started=true
     }
   });
@@ -252,7 +261,7 @@ $( document ).ready(function() {
   me.on('changeDirection', function(snake){
     if(started && exists(snake.id)){
       var s = findSnake(snake.id);
-      s.s = snake.s;
+      s.d = snake.d;
       updateSnake(s);
     }
   });
@@ -273,9 +282,12 @@ $( document ).ready(function() {
       var s = findSnake(snake.id);
       s.s = snake.s;
       updateSnake(s);
-      clearInterval(game_loop);
-      var cells = [];
-      var started = false;
+      console.log("Winner is : "+JSON.stringify(s));
+      clearInterval(loop);
+      cells = [];
+      started = false;
+      counter=0;
+      me.emit('init');
     }
   });
 
@@ -287,8 +299,14 @@ $( document ).ready(function() {
     }
   });
 
-  me.on('list', function(msg){
+  me.on('snakes', function(msg){
     update(msg);
+  });
+
+  me.on('waiting', function(msg){
+    for(var i = 0; i<msg.length; i++){
+      addSnake(msg[i]);
+    }
   });
 });
 </script>
