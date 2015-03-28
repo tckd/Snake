@@ -1,4 +1,5 @@
-[![Snake logo](img/logo.png)](http://tckd.me/)
+[![Snake logo](img/tckd-logo.png)](http://tckd.me/)
+[![tckd logo](img/tckd.png)](http://tckd.me/)
 
   A multiplayer Snake game
 
