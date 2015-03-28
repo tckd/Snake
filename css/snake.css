@@ -3,22 +3,20 @@
  * Most of these are inherited from Base, but I want to change a few.
  */
 body {
-    color: #AAA;
-    background: rgb(5, 15, 30);
+  color: #AAA;
+  background: rgb(37, 42, 58);
 }
 
 a {
-    text-decoration: none;
-    color: #1b98f8;
+  text-decoration: none;
+  color: #1b98f8;
 }
-
 
 /*
  * -- HELPER STYLES --
  * Over-riding some of the .pure-button styles to make my buttons look unique
  */
-.primary-button,
-.secondary-button {
+.primary-button {
     -webkit-box-shadow: none;
     -moz-box-shadow: none;
     box-shadow: none;
@@ -29,98 +27,67 @@ a {
     background: #1b98f8;
     margin: 1em 0;
 }
-.secondary-button {
-    background: #fff;
-    border: 1px solid #ddd;
-    color: #666;
-    padding: 0.5em 2em;
-    font-size: 80%;
-}
 
-/*
- * -- LAYOUT STYLES --
- * This layout consists of three main elements, `#nav` (navigation bar), `#list` (snake list), and `#main` (snake content). All 3 elements are within `#layout`
- */
-#layout, #nav, #list, #main {
-    margin: 0;
-    padding: 0;
-    position: static;
+#layout, #nav, #main {
+  margin: 0;
+  padding: 0;
+  position: static;
 }
 
 #layout {
-    padding-left:130px;
+    padding-left:260px;
     position: relative;
 }
 
 /* Make the navigation 100% width on phones */
 #nav {
-    position: fixed;
-    background: rgb(37, 42, 58);
-    text-align: center;
-    overflow: auto;
-    margin-left:-130px;
-    width:120px;
-    height: 100%;
+  position: fixed;
+  text-align: center;
+  overflow: auto;
+  margin-left:-260px;
+  width:260px;
+  height: 100%;
 }
 
 /* Show the "Menu" button on phones */
 #nav .nav-menu-button {
   color: rgb(230, 230, 230);
   display: block;
-  top: 1em;
+  padding: 1em;
+  padding-bottom: 0;
   position: relative;
 }
 
-/* When "Menu" is clicked, the navbar should be 80% height */
-#nav.active {
-    height: 80%;
+.me {
+  background: rgb(55, 60, 90);
 }
 
-/* Don't show the navigation items... */
-.nav-inner {
-    display: block;
-    padding: 2em 0;
-}
-
-/* ...until the "Menu" button is clicked */
-#nav.active .nav-inner {
-    display: block;
-    padding: 2em 0;
-}
-
-
-/*
- * -- NAV BAR STYLES --
- * Styling the default .pure-menu to look a little more unique.
- */
 #nav .pure-menu {
     background: transparent;
     border: none;
     text-align: left;
 }
+
 #nav .pure-menu-link:hover,
 #nav .pure-menu-link:focus {
   background: rgb(55, 60, 90);
-}
-#nav .pure-menu-link {
-  margin-left: 0.5em;
 }
 
 .snake-direction{
   color: rgb(150, 150, 150);
 }
-.snake-init{
+.init{
   color: rgb(192, 192, 192);
 }
-.snake-ready{
+.ready{
   color: rgb(0, 128, 255);
 }
-.snake-dead{
+.dead{
   color: rgb(255, 51, 51);
 }
-.snake-won{
+.won{
   color: rgb(0, 153, 0);
 }
-.snake-disconnected{
+.disconnected{
   color: rgb(153, 0, 153);
 }
