@@ -4,9 +4,16 @@
 
 ## Running
 
+  Run the following command
 ```bash
 $ node index.js
 ```
+
+  Then go to
+```web
+http://localhost:3000
+```
+
 
 ## Features
 
