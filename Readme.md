@@ -1,4 +1,3 @@
-[![Snake logo](img/tckd-logo.png)](http://tckd.me/)
 [![tckd logo](img/tckd.png)](http://tckd.me/)
 
   A multiplayer Snake game
@@ -14,7 +13,6 @@ $ node index.js
 ```web
 http://localhost:3000
 ```
-
 
 ## Features
 
@@ -43,4 +41,4 @@ http://localhost:3000
 
 ## License
 
-  [MIT](LICENSE)
+  [No License](LICENSE)
