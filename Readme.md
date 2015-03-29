@@ -6,13 +6,16 @@
 
   Run the following command
 ```bash
-$ node index.js
+$ node app.js
 ```
 
   Then go to
 ```web
 http://localhost:3000
 ```
+
+and follow instructions...
+
 
 ## Features
 
@@ -25,7 +28,16 @@ http://localhost:3000
 
   * Restart new game not working
   * Client code not running when window is not active!
-
+  * Single player, can never win! - Fix won() method
+```
+if(single player mode){
+  var lost = lost();
+  // todo
+} else {
+  var win = won();
+  // todo
+}
+```
 ### Enhancements
 
   * Instructions page on how to SnakeRide -- done
@@ -39,23 +51,8 @@ http://localhost:3000
   * High score list for single player mode
   * Wiced sensor controllable
   * Add command search functionality (Inspiration: atom.io)
+  * Dynamic adjust to screen size by using dynamic cell size -- done
   * 
-
-
-## Quick Start
-
-  To command your snake use the following keys
-
-```command
-9 - Start
-8 - Request list of players
-7 - Request list of waiting players (not implemented)
-n - Request new game
-up - Change snake direction up
-down - Change snake direction down
-left - Change snake direction left
-right - Change snake direction right
-```
 
 ## License
 

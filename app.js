@@ -39,7 +39,7 @@ var started = false;
 
 function createSnake(id){
   var cp = snakes.length*2+2;
-  return {"id":id, "n":id.substr(0, 9), "d":"right", "s":"init", "c":{"x":2,"y":cp}};
+  return {"id":id, "n":id.substr(0, 7), "d":"right", "s":"init", "c":{"x":2,"y":cp}};
 }
 
 function init(){
@@ -154,12 +154,15 @@ io.on('connection', function(client){
     var snake = findSnake(client.id);
     snake.s = "won";
     io.emit('winner', snake);
+    init();
   });
 
+  /*
   client.on('init', function(){
     console.log('Snake with id '+client.id+' Initiated new game!');
     init();
   });
+  */
 
   client.on('crashed', function(){
     console.log('Snake with id '+client.id+' has Crashed!');

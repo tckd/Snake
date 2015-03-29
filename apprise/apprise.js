@@ -1,6 +1,5 @@
 function apprise(string, args, callback) {
-	var default_args =
-	{
+	var default_args = {
 		'confirm'	:	false, 	// Ok and Cancel buttons
 		'verify'	:	false,	// Yes and No buttons
 		'input'		:	false, 	// Returns with user inputed text
@@ -17,7 +16,6 @@ function apprise(string, args, callback) {
 				args[index] = default_args[index];
 			}
 		}
-
 	}
 
 	var aHeight = $(document).height();
@@ -46,7 +44,7 @@ function apprise(string, args, callback) {
 
 	if(args) {
     if(args['input']) {
-			$('.appriseInner').append('<div class="aInput"><input type="text" class="aTextbox" t="aTextbox" /></div>');
+			$('.appriseInner').append('<div class="aInput"><input type="text" class="aTextbox" t="aTextbox" placeholder="Max length = 7" /></div>');
 			$('.aTextbox').focus();
 		}
 	}
@@ -75,7 +73,11 @@ function apprise(string, args, callback) {
 	});
 
 	var aText = false;
-	$('.aTextbox').keyup(function() { aText = $(this).val(); });
+	$('.aTextbox').keyup(function() {
+		aText = $(this).val().substr(0, 7);
+	});
+
+
   $('.aButtons > button').click(function() {
     $('.appriseOverlay').remove();
 		$('.appriseOuter').remove();
