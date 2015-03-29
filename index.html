@@ -31,21 +31,21 @@
   </body>
 <script>
 $( document ).ready(function() {
+
   if(isMobile()){
     $('#status').replaceWith('<div id="status"><h1 id="support">Mobile is not supported!</h1></div>');
     return;
   }
+
   var canvas = $("#canvas")[0];
   var ctx = canvas.getContext("2d");
   var w = 100;
   var h = 100;
   var cw = 5; // default
-
   var ww = window.innerWidth - 154;
   var wh = window.innerHeight - 4;
   var dcw = Math.floor(ww/w);
   var dch = Math.floor(wh/h);
-
   if(dcw<dch){
     if(dcw > 5){
       cw = dcw;
@@ -59,7 +59,7 @@ $( document ).ready(function() {
   var me = io();
   var snakes = [];
   var cells = [];
-  var started = false;
+  var running = false;
   var loop;
   var counter = 0;
 
@@ -76,17 +76,20 @@ $( document ).ready(function() {
   function run() {
     console.log(counter++);
     moveAllLiveSnakes();
-    paint();
+    paintCells();
   }
 
   function moveAllLiveSnakes() {
+    //console.log("move is called: "+JSON.stringify(snakes));
     for(var i = 0; i < snakes.length; i++){
+      //console.log("Move player: "+JSON.stringify(snakes[i]));
       var p = snakes[i];
-      if(p.s=="ready"){ // paint only live snakes
+      if(p.s=="ready"){ // only live snakes can move
+        console.log(JSON.stringify("status ready: "+p));
         move(p);
-        if(p.id==me.id){ // only broadcast my collision
+        if(p.id==me.id){ // only check my collision
           if(checkCollision(p)){
-            me.emit('crashed');
+            me.emit('status','crashed');// Broadcast my collision
             $('#run').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner fa-pulse"></i></button>');
           }
         }
@@ -123,18 +126,13 @@ $( document ).ready(function() {
     return false;
   }
 
-  function paint() {
+  function paintCells() {
     for(var i = 0; i < cells.length; i++) {
-      var c = cells[i];
-      paintCell(c.x, c.y);
+      ctx.fillStyle = "rgb(150, 150, 150)";
+      ctx.fillRect(cells[i].x*cw, cells[i].y*cw, cw, cw);
+      ctx.strokeStyle = "rgb(37, 42, 58)";
+      ctx.strokeRect(cells[i].x*cw, cells[i].y*cw, cw, cw);
     }
-  }
-
-  function paintCell(x, y) {
-    ctx.fillStyle = "rgb(150, 150, 150)";
-    ctx.fillRect(x*cw, y*cw, cw, cw);
-    ctx.strokeStyle = "rgb(37, 42, 58)";
-    ctx.strokeRect(x*cw, y*cw, cw, cw);
   }
 
   function exists(snakeID){
@@ -146,9 +144,9 @@ $( document ).ready(function() {
     return false;
   }
 
-  function dead(snakeID){
+  function live(snakeID){
     for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].id==snakeID && snakes[i].s=="dead") {
+      if(snakes[i].id==snakeID && snakes[i].s=="ready") {
         return true;
       }
     }
@@ -164,31 +162,28 @@ $( document ).ready(function() {
     return;
   }
 
-  function won(){
+  function iWon(){
+    if(!running){
+      return false;
+    }
     var nrLiveSnakes = 0;
+    var iLive = false;
     for(var i = 0; i<snakes.length; i++){
       if(snakes[i].s=="ready"){
         nrLiveSnakes++;
+        if(snakes[i].id==me.id){
+          iLive = true;
+        }
       }
     }
-    if(nrLiveSnakes==1){
+    if(nrLiveSnakes==1 && iLive){
       return true;
     } else {
       return false;
     }
   }
 
-  function winner(){
-    for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].s=="ready"){
-        return snakes[i];
-      }
-    }
-    return {};
-  }
-
-  function update(snakes){
-    paintWorld();
+  function paintSnakes(snakes){
     $("#snakes").empty();
     for(var i = 0; i < snakes.length; i++){
       if(snakes[i].id==me.id){
@@ -199,17 +194,7 @@ $( document ).ready(function() {
     }
   }
 
-  function addSnake(s){
-    paintWorld();
-    if(s.id==me.id){
-      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.n+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
-    } else {
-      $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.n+'\">'+s.id+' <span class=\"direction\">- '+s.d+'</span></a>'));
-    }
-  }
-
-  function updateSnake(s){
-    //paintWorld();
+  function paintSnakeStatus(s){
     if(s.id==me.id){
       $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.n+' <span class=\"direction\">- '+s.d+'</span></a>');
     } else {
@@ -220,46 +205,42 @@ $( document ).ready(function() {
   $(document).keydown(function(e){
     var key = e.which;
 
-    /*
-    if(key == "57" && exists(me.id) && !started){ // 9 - start
-      me.emit('ready');
-    } else
-    */
-
     if(key == "56"){ // 8 - get list of snakes
       me.emit('snakes');
-    } else if(key == "37" && !dead(me.id) && findSnake(me.id).d != "right" && started){
-      me.emit('changeDirection', "left");
-    } else if(key == "38" && !dead(me.id) && findSnake(me.id).d != "down" && started){
-      me.emit('changeDirection', "up");
-    } else if(key == "39" && !dead(me.id) && findSnake(me.id).d != "left" && started){
-      me.emit('changeDirection', "right");
-    } else if(key == "40" && !dead(me.id) && findSnake(me.id).d != "up" && started){
-      me.emit('changeDirection', "down");
+    } else if(key == "37" && running && live(me.id) && findSnake(me.id).d != "right"){
+      me.emit('d', "left");
+    } else if(key == "38" && running && live(me.id) && findSnake(me.id).d != "down"){
+      me.emit('d', "up");
+    } else if(key == "39" && running && live(me.id) && findSnake(me.id).d != "left"){
+      me.emit('d', "right");
+    } else if(key == "40" && running && live(me.id) && findSnake(me.id).d != "up"){
+      me.emit('d', "down");
     }
   });
 
   $('#start').click(function(){
-    if(exists(me.id) && !started && snakes.length>1){
-      me.emit('ready');
-      // change start button to waiting for snakes ...
-      $('#start').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner  fa-pulse"></i></button>');
-    } else if(!started) {
-      apprise("Invite someone to play with you.</p><code>http://tckd.me</code>", {}, function(r){
-        console.log('Waiting for someone to join');
-  		});
-    } else if(started) {
+    console.log("start button clicked");
+    if(running) {
       apprise("Wait for the current game to end!", {}, function(r){
         console.log('Waiting for the current game to end');
   		});
+    } else {
+      if(snakes.length<2){
+        apprise("Invite someone to play with you.</p><code>http://tckd.me</code>", {}, function(r){
+          console.log('Waiting for someone to join');
+    		});
+      } else {
+        me.emit('status','ready');
+        // change start button to waiting for snakes ...
+        $('#start').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner  fa-pulse"></i></button>');
+      }
     }
   });
 
-  // Used to detect whether the users browser is an mobile browser
   function isMobile() {
-    if (sessionStorage.desktop){// desktop storage
+    if (sessionStorage.desktop){
       return false;
-    } else if (localStorage.mobile) { // mobile storage
+    } else if (localStorage.mobile) {
       return true;
     }
     // alternative
@@ -272,119 +253,105 @@ $( document ).ready(function() {
     return false;
   }
 
-//-------------------
-// communications
-//-------------------
-  me.on('connect', function() {
-    console.log("You'r connected: "+me.id);
-
+  function updateSnakeName(){
     var ins = '</p><h1>Game Instructions</h1><p><strong>Controls</strong></p>';
     ins += '<p> ↑ : up<br>';
     ins += '<p> ↓ : down<br>';
     ins += '<p> → : left<br>';
     ins += '<p> ← : right<br>';
     ins += '</p><p><strong>Enter your name</strong>';
-
     apprise(ins, {'input':true,'animate':true, 'ok': 'Join', 'cancel':'Avbryt'}, function(r){
       if(r){
+        // console.log('Ok button or enter');
         if(typeof(r)=='string'){
           me.emit('name',r);
-          // console.log(r);
-        } else {
-          // console.log('True');
         }
 			} else {
-        // console.log('False');
+        // console.log('Cancel button');
       }
 		});
+  }
 
+//-------------------
+// communications
+//-------------------
+  me.on('connect', function() {
+    console.log("You'r connected: "+me.id);
+    updateSnakeName();
   });
 
-  me.on('join', function(msg){
-    if(!started){
-      snakes = msg;
-      update(snakes);
+  me.on('join', function(game){
+    running = game.running;
+    if(running){
+      // wait for the current game to end
     } else {
-      // what to do with with Snakes joining in the middle of game?
+      snakes = game.snakes;
+      paintWorld();
+      paintSnakes(snakes);
     }
   });
 
-  me.on('ready', function(snake){
-    if(!started && exists(snake.id)){
+  me.on('start', function(msg){
+    if(typeof loop !=="undefined"){
+      console.log("typeof loop!==undefined: "+loop);
+      clearInterval(loop);
+    }
+
+    cells = [];
+    counter=0;
+    snakes = msg;
+    paintWorld();
+    paintSnakes(snakes);
+    console.log("Game Started!");
+    $('#ready').replaceWith('<button id="run" class="primary-button pure-button"><i class="fa fa-spinner  fa-spin"></i></button>');
+    loop = setInterval(run, 100);
+    running=true
+  });
+
+  me.on('d', function(snake){
+    if(exists(snake.id)){
       var s = findSnake(snake.id);
-      s.s = snake.s;
-      updateSnake(s);
+      s.d = snake.d;
     }
   });
 
-  me.on('name', function(snake){
+  me.on('name',function(snake){
     if(exists(snake.id)){
       var s = findSnake(snake.id);
       s.n = snake.n;
-      updateSnake(s);
+      paintSnakeStatus(s);
     }
   });
 
-  me.on('start', function(){
-    if(!started){
-      console.log("Game started!");
-      $('#ready').replaceWith('<button id="run" class="primary-button pure-button"><i class="fa fa-spinner  fa-spin"></i></button>');
-      paintWorld();
-      loop = setInterval(run, 100);
-      started=true
-    }
-  });
-
-  me.on('changeDirection', function(snake){
-    if(started && exists(snake.id)){
-      var s = findSnake(snake.id);
-      s.d = snake.d;
-      updateSnake(s);
-    }
-  });
-
-  me.on('crashed', function(snake){
-    if(started && exists(snake.id)){
+  me.on('status',function(snake){
+    if(exists(snake.id)){
       var s = findSnake(snake.id);
       s.s = snake.s;
-      updateSnake(s);
-      if(won() && winner().id == me.id){
-        me.emit('winner');
-        $('#run').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
+      paintSnakeStatus(s);
+      if(iWon()){
+        me.emit('win');
+        console.log("I win: "+s.n);
       }
     }
   });
 
-  me.on('winner', function(snake){
-    if(started && exists(snake.id)){
-      var s = findSnake(snake.id);
-      s.s = snake.s;
-      updateSnake(s);
-      console.log("Winner is : "+JSON.stringify(s));
-      clearInterval(loop);
-      cells = [];
-      started = false;
-      counter=0;
-    }
+  me.on('winner', function(snakeID){
+    console.log("Game is won by: "+snakeID);
+    var snake = findSnake(snakeID);
+    snake.s = "won";
+    paintSnakeStatus(snake);
+    clearInterval(loop);
+    cells = [];
+    running = false;
+    counter=0;
+    $('#ready').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
+    $('#run').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
   });
 
-  me.on('connectionLost', function(snake){
-    if(exists(snake.id)){
-      var s = findSnake(snake.id);
-      s.s = snake.s;
-      updateSnake(s);
-    }
+  me.on('snakes', function(snakes){
+    paintSnakes(snakes);
   });
 
-  me.on('snakes', function(msg){
-    update(msg);
-  });
-
-  me.on('waiting', function(msg){
-    for(var i = 0; i<msg.length; i++){
-      addSnake(msg[i]);
-    }
-  });
 });
 
 </script>

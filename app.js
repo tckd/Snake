@@ -4,6 +4,7 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+
 app.use(express.static(__dirname, 'css'));
 app.use(express.static(__dirname, 'apprise'));
 app.use(express.static(__dirname, 'img'));
@@ -33,32 +34,43 @@ var port = (process.env.VCAP_APP_PORT || 3000);
 server.listen(port, host);
 console.log('listening on *' + port);
 
-var snakes = [];
-var waiting = [];
-var started = false;
+var game = {
+  'running':false, 'snakes':[], 'waiting':[]
+};
 
 function createSnake(id){
-  var cp = snakes.length*2+2;
-  return {"id":id, "n":id.substr(0, 7), "d":"right", "s":"init", "c":{"x":2,"y":cp}};
+  return {"id":id, "n":id.substr(0, 7), "d":"right", "s":"init", "c":{"x":10,"y":5}};
 }
 
-function init(){
-  for(var i = 0; i<waiting.length;i++){
-    snakes.push(waiting[i]);
+function resetSnakes(){
+  for(var i = 0; i<game.waiting.length;i++){
+    game.snakes.push(game.waiting[i]);
   }
-  waiting = [];
-  for(var i = 0; i<snakes.length; i++){
-    snakes[i].s="init";
-    snakes[i].d="right";
-    snakes[i].c={'x':2,'y':i*2+2};
+  game.waiting = [];
+
+  var nrSnakes = game.snakes.length;
+  //console.log("nr of snakes: "+nrSnakes);
+  var space = Math.floor(100/(nrSnakes+1));
+  //console.log("distance bettween snakes: "+space);
+  for(var i = 0; i < nrSnakes; i++){
+    game.snakes[i].d="right";
+    game.snakes[i].c.x = 10;
+    game.snakes[i].c.y = space*i + space;
+    //console.log("Positions: "+JSON.stringify(game.snakes[i].c));
   }
-  started = false;
 }
+
+function resetSnakesStatus(){
+  for(var i = 0; i < game.snakes.length; i++){
+    game.snakes[i].s="init";
+  }
+}
+
 
 
 function isAllSnakesReady(){
-  for(var i = 0; i<snakes.length; i++){
-    if(snakes[i].s!="ready") {
+  for(var i = 0; i<game.snakes.length; i++){
+    if(game.snakes[i].s!="ready") {
       return false;
     }
   }
@@ -67,72 +79,58 @@ function isAllSnakesReady(){
 
 function removeSnake(id){
   var gamers = [];
-  var removed = false;
-  for(var i = 0; i<snakes.length; i++){
-    if(snakes[i].id!=id) {
-      gamers.push(snakes[i]);
+  var removed = false
+  for(var i = 0; i<game.snakes.length; i++){
+    if(game.snakes[i].id!=id) {
+      gamers.push(game.snakes[i]);
     } else {
       removed = true;
     }
   }
-  snakes = gamers;
+  game.snakes = gamers;
 
   if(removed){
     return;
   }
 
   var waitingSnakes = [];
-
-  for(var i = 0; i<waiting.length; i++){
-    if(waiting[i].id!=id) {
-      waitingSnakes.push(waiting[i]);
+  for(var i = 0; i<game.waiting.length; i++){
+    if(game.waiting[i].id!=id) {
+      waitingSnakes.push(game.waiting[i]);
     }
   }
-  waiting = waitingSnakes;
-}
-
-/* Not used*/
-function exists(snakeID){
-  for(var i = 0; i<snakes.length; i++){
-    if(snakes[i].id==snakeID) {
-      return true;
-    }
-  }
-  for(var i = 0; i<waiting.length; i++){
-    if(waiting[i].id==snakeID) {
-      return true;
-    }
-  }
-  return false;
+  game.waiting = waitingSnakes;
 }
 
 function findSnake(snakeID){
-  for(var i = 0; i<snakes.length; i++){
-    if(snakes[i].id==snakeID) {
-      return snakes[i];
+  for(var i = 0; i<game.snakes.length; i++){
+    if(game.snakes[i].id==snakeID) {
+      return game.snakes[i];
     }
   }
   return;
 }
 
+/*
+Communication
+*/
+
 io.on('connection', function(client){
   console.log('Snake with id '+client.id+' is connected');
+
   var snake = createSnake(client.id);
-
-  if(!started){
-    snakes.push(snake);
+  if(!game.running){
+    game.snakes.push(snake);
   } else {
-    waiting.push(snake);
+    game.waiting.push(snake);
   }
-
-  io.emit('join', snakes);
+  io.emit('join', game);
 
   client.on('disconnect', function(){
-    console.log('Snake with id '+client.id+' is disconnected!');
-    var snake = createSnake(client.id);
-    snake.s="disconnected";
-    removeSnake(client.id); // Remove from both list
-    io.emit('connectionLost', snake);
+    var snake = findSnake(client.id);
+    snake.s = "disconnected";
+    removeSnake(client.id);
+    io.emit('status', snake);
   });
 
   client.on('name', function(name){
@@ -142,55 +140,34 @@ io.on('connection', function(client){
     io.emit('name', snake);
   });
 
-  client.on('changeDirection', function(direction){
+  client.on('d', function(direction){
     console.log('Snake with id '+client.id+' changed direction to '+direction);
     var snake = findSnake(client.id);
     snake.d = direction;
-    io.emit('changeDirection', snake);
+    io.emit('d', snake);
   });
 
-  client.on('winner', function(){
-    console.log('Snake with id '+client.id+' Won!');
+  client.on('status', function(status){
+    console.log('Snake with id '+client.id+' changed status to '+status);
     var snake = findSnake(client.id);
-    snake.s = "won";
-    io.emit('winner', snake);
-    init();
-  });
-
-  /*
-  client.on('init', function(){
-    console.log('Snake with id '+client.id+' Initiated new game!');
-    init();
-  });
-  */
-
-  client.on('crashed', function(){
-    console.log('Snake with id '+client.id+' has Crashed!');
-    var snake = findSnake(client.id);
-    snake.s = "dead";
-    io.emit('crashed', snake);
-  });
-
-  client.on('ready', function () {
-    console.log('Snake with id '+client.id+' is Ready!');
-    var snake = findSnake(client.id);
-    snake.s = "ready";
-    io.emit('ready',snake);
-    // start a new game when all the snakes are ready
-    if(isAllSnakesReady()){
-      console.log('New game started!');
-      started = true;
-      io.emit('start');
+    snake.s = status;
+    io.emit('status', snake);
+    if(status=="ready" && isAllSnakesReady() && !game.running){
+      resetSnakes();
+      game.running = true;
+      io.emit('start', game.snakes);
     }
   });
 
+  client.on('win', function(){
+    console.log('Snake with id '+client.id+' Won!');
+    game.running = false;
+    resetSnakesStatus();
+    io.emit('winner', client.id);
+  });
+
   client.on('snakes', function () {
-    console.log("List of snakes requested");
     io.emit('snakes', snakes);
   });
 
-  client.on('waiting', function () {
-    console.log("List of wating snakes requested");
-    io.emit('waiting', waiting);
-  });
 });

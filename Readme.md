@@ -18,9 +18,10 @@ and follow instructions...
 
 
 ## Features
-
-  * Multiplayer Snake game
-  * Highly efficient
+  * Dynamic adjust to screen size
+  * Multiplayer mode - unlimited amount of players
+  * Single player mode - with levels and high score list (not implementd)
+  *
 
 ## Bugs, Enhancements, Feature Requests
 
@@ -28,20 +29,11 @@ and follow instructions...
 
   * Restart new game not working
   * Client code not running when window is not active!
-  * Single player, can never win! - Fix won() method
-```
-if(single player mode){
-  var lost = lost();
-  // todo
-} else {
-  var win = won();
-  // todo
-}
-```
+  * Start position
+
 ### Enhancements
 
-  * Instructions page on how to SnakeRide -- done
-  * Once the 'Start' button is clicked, the button should change to something else, indicating waiting for other players...
+  * Invite other snake players
 
 ### Feature Requests
 
@@ -50,9 +42,9 @@ if(single player mode){
   * Ability to create custom levels/world
   * High score list for single player mode
   * Wiced sensor controllable
-  * Add command search functionality (Inspiration: atom.io)
-  * Dynamic adjust to screen size by using dynamic cell size -- done
-  * 
+  * Command search functionality (Inspiration: atom.io)
+  * Mobile support
+  *
 
 ## License
 
