@@ -2,10 +2,6 @@
 
   A multiplayer Snake game
 
-```www
-http://tckd.me/
-```
-
 ## Running
 
   Run the following command
@@ -22,14 +18,29 @@ http://localhost:3000
 
   * Multiplayer Snake game
   * Highly efficient
-  * Ability to create custom world
 
 ## Bugs, Enhancements, Feature Requests
 
-  * Single player levels
-  * Single player high score
-  * Multiplayer ...
+### Bugs
+
+  * Restart new game not working
+  * Client code not running when window is not active!
+
+### Enhancements
+
+  * Instructions page on how to SnakeRide -- done
+  * Once the 'Start' button is clicked, the button should change to something else, indicating waiting for other players...
+
+### Feature Requests
+
+  * Single player mode
+  * Levels for single player mode
+  * Ability to create custom levels/world
+  * High score list for single player mode
   * Wiced sensor controllable
+  * Add command search functionality (Inspiration: atom.io)
+  * 
+
 
 ## Quick Start
 

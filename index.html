@@ -6,10 +6,14 @@
     <title>Snake/Ride</title>
     <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
     <link rel="stylesheet" href="css/snake.css">
+
     <script src="/socket.io/socket.io.js"></script>
+
     <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script src="apprise/apprise-v2.js"></script>
-    <link rel="stylesheet" href="apprise/apprise-v2.css">
+
+    <script src="apprise/apprise.js"></script>
+    <link rel="stylesheet" href="apprise/apprise.css"/>
+
   </head>
   <body>
     <div id="layout" class="content pure-g">
@@ -237,7 +241,26 @@ $( document ).ready(function() {
 //-------------------
   me.on('connect', function() {
     console.log("You'r connected: "+me.id);
-    Apprise('What is your name?', options);
+
+    var ins = '</p><h1>How to play</h1><p><strong>Control your snake with the following keys</strong></p>';
+    ins += '<p>up - Change snake direction up<br>';
+    ins += '<p>down - Change snake direction down<br>';
+    ins += '<p>left - Change snake direction left<br>';
+    ins += '<p>right - Change snake direction right<br>';
+    ins += '</p><p><strong>Enter your name and click Join</strong>';
+    apprise(ins, {'input':true,'animate':true, 'ok': 'Join', 'cancel':'Avbryt'}, function(r){
+      if(r){
+        if(typeof(r)=='string'){
+          me.emit('name',r);
+          console.log(r);
+        } else {
+          console.log('True');
+        }
+			} else {
+        console.log('False');
+      }
+		});
+
   });
 
   me.on('join', function(msg){
@@ -324,23 +347,7 @@ $( document ).ready(function() {
       addSnake(msg[i]);
     }
   });
-
-  var options = {
-  	buttons: {
-  		confirm: {
-  			text: 'Change',
-  			className: 'blue',
-  			action: function(e) {
-          me.emit('name',e.input);
-  				Apprise('close');
-  			}
-  		},
-  	},
-  	input: true,
-  };
-
 });
-
 
 </script>
 </html>
