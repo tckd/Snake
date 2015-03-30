@@ -61,9 +61,11 @@ a {
 .direction{
   color: rgb(150, 150, 150);
 }
+
 .init{
   color: rgb(192, 192, 192);
 }
+
 .ready{
   color: rgb(0, 153, 0);
 }
@@ -85,15 +87,17 @@ a {
 }
 
 #start {
-  background: rgb(0, 153, 0);
+  background: rgb(55, 60, 90);
+  /*background: rgb(0, 153, 0);*/
+}
+
+#run {
+  background: rgb(55, 60, 90);
+  /*background: rgb(0, 153, 0);*/
 }
 
 #ready {
   background: rgb(55, 60, 90);
-}
-
-#run {
-  background: rgb(0, 153, 0);
 }
 
 #dead {

@@ -39,7 +39,7 @@ var game = {
 };
 
 function createSnake(id){
-  return {"id":id, "n":id.substr(0, 7), "d":"right", "s":"init", "c":{"x":10,"y":5}};
+  return {"id":id, "n":id.substr(0, 7), "d":"høyre", "s":"init", "c":{"x":10,"y":5}};
 }
 
 function resetSnakes(){
@@ -53,7 +53,7 @@ function resetSnakes(){
   var space = Math.floor(100/(nrSnakes+1));
   //console.log("distance bettween snakes: "+space);
   for(var i = 0; i < nrSnakes; i++){
-    game.snakes[i].d="right";
+    game.snakes[i].d="høyre";
     game.snakes[i].c.x = 10;
     game.snakes[i].c.y = space*i + space;
     //console.log("Positions: "+JSON.stringify(game.snakes[i].c));
@@ -116,7 +116,7 @@ Communication
 */
 
 io.on('connection', function(client){
-  console.log('Snake with id '+client.id+' is connected');
+  //console.log('Snake with id '+client.id+' is connected');
 
   var snake = createSnake(client.id);
   if(!game.running){
@@ -134,21 +134,21 @@ io.on('connection', function(client){
   });
 
   client.on('name', function(name){
-    console.log('Snake with id '+client.id+' changed name to '+name);
+    //console.log('Snake with id '+client.id+' changed name to '+name);
     var snake = findSnake(client.id);
     snake.n = name;
     io.emit('name', snake);
   });
 
   client.on('d', function(direction){
-    console.log('Snake with id '+client.id+' changed direction to '+direction);
+    //console.log('Snake with id '+client.id+' changed direction to '+direction);
     var snake = findSnake(client.id);
     snake.d = direction;
     io.emit('d', snake);
   });
 
   client.on('status', function(status){
-    console.log('Snake with id '+client.id+' changed status to '+status);
+    //console.log('Snake with id '+client.id+' changed status to '+status);
     var snake = findSnake(client.id);
     snake.s = status;
     io.emit('status', snake);
@@ -160,7 +160,7 @@ io.on('connection', function(client){
   });
 
   client.on('win', function(){
-    console.log('Snake with id '+client.id+' Won!');
+    //console.log('Snake with id '+client.id+' Won!');
     game.running = false;
     resetSnakesStatus();
     io.emit('winner', client.id);

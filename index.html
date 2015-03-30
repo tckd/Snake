@@ -37,24 +37,15 @@ $( document ).ready(function() {
     return;
   }
 
+  var bodyColor = "rgb(150, 150, 150)";
+  var borderColor = "rgb(37, 42, 58)";
+
   var canvas = $("#canvas")[0];
   var ctx = canvas.getContext("2d");
   var w = 100;
   var h = 100;
   var cw = 5; // default
-  var ww = window.innerWidth - 154;
-  var wh = window.innerHeight - 4;
-  var dcw = Math.floor(ww/w);
-  var dch = Math.floor(wh/h);
-  if(dcw<dch){
-    if(dcw > 5){
-      cw = dcw;
-    }
-  } else {
-    if(dch > 5){
-      cw = dch;
-    }
-  }
+  adjustWindow(window.innerHeight - 4, window.innerWidth - 154);
 
   var me = io();
   var snakes = [];
@@ -63,10 +54,25 @@ $( document ).ready(function() {
   var loop;
   var counter = 0;
 
+
+  function adjustWindow(hight,width){
+    var dcw = Math.floor(width/w);
+    var dch = Math.floor(hight/h);
+    if(dcw<dch){
+      if(dcw > 5){
+        cw = dcw;
+      }
+    } else {
+      if(dch > 5){
+        cw = dch;
+      }
+    }
+  }
+
+
   function paintWorld(){
     canvas.width = w*cw;
     canvas.height = h*cw;
-
     ctx.fillStyle = "rgb(37, 42, 58)";
     ctx.fillRect(0, 0, w*cw, h*cw);
     ctx.strokeStyle = "rgb(150, 150, 150)";
@@ -74,18 +80,15 @@ $( document ).ready(function() {
   }
 
   function run() {
-    console.log(counter++);
-    moveAllLiveSnakes();
+    //console.log(counter++);
     paintCells();
+    moveAllLiveSnakes();
   }
 
   function moveAllLiveSnakes() {
-    //console.log("move is called: "+JSON.stringify(snakes));
     for(var i = 0; i < snakes.length; i++){
-      //console.log("Move player: "+JSON.stringify(snakes[i]));
       var p = snakes[i];
       if(p.s=="ready"){ // only live snakes can move
-        console.log(JSON.stringify("status ready: "+p));
         move(p);
         if(p.id==me.id){ // only check my collision
           if(checkCollision(p)){
@@ -99,14 +102,18 @@ $( document ).ready(function() {
   }
 
   function move(snake) {
-    if(snake.d == "right"){
+    if(snake.d == "høyre"){
       snake.c.x++;
-    } else if(snake.d == "left"){
+    } else if(snake.d == "venstre"){
       snake.c.x--;
-    } else if(snake.d == "up"){
+    } else if(snake.d == "opp"){
       snake.c.y--;
-    } else if(snake.d == "down") {
+    } else if(snake.d == "ned") {
       snake.c.y++;
+    }
+    // paint the head of my snake
+    if(snake.id==me.id){
+      paintCell(snake.c.x,snake.c.y,"rgb(0, 153, 0)","rgb(0, 153, 0)");
     }
   }
 
@@ -128,11 +135,15 @@ $( document ).ready(function() {
 
   function paintCells() {
     for(var i = 0; i < cells.length; i++) {
-      ctx.fillStyle = "rgb(150, 150, 150)";
-      ctx.fillRect(cells[i].x*cw, cells[i].y*cw, cw, cw);
-      ctx.strokeStyle = "rgb(37, 42, 58)";
-      ctx.strokeRect(cells[i].x*cw, cells[i].y*cw, cw, cw);
+      paintCell(cells[i].x,cells[i].y,bodyColor,borderColor);
     }
+  }
+
+  function paintCell(x,y,fc,sc){
+    ctx.fillStyle = fc;
+    ctx.fillRect(x*cw, y*cw, cw, cw);
+    ctx.strokeStyle = sc;
+    ctx.strokeRect(x*cw, y*cw, cw, cw);
   }
 
   function exists(snakeID){
@@ -207,34 +218,44 @@ $( document ).ready(function() {
 
     if(key == "56"){ // 8 - get list of snakes
       me.emit('snakes');
-    } else if(key == "37" && running && live(me.id) && findSnake(me.id).d != "right"){
-      me.emit('d', "left");
-    } else if(key == "38" && running && live(me.id) && findSnake(me.id).d != "down"){
-      me.emit('d', "up");
-    } else if(key == "39" && running && live(me.id) && findSnake(me.id).d != "left"){
-      me.emit('d', "right");
-    } else if(key == "40" && running && live(me.id) && findSnake(me.id).d != "up"){
-      me.emit('d', "down");
+    } else if(key == "37" && running && live(me.id) && findSnake(me.id).d != "høyre"){
+      me.emit('d', "venstre");
+    } else if(key == "38" && running && live(me.id) && findSnake(me.id).d != "ned"){
+      me.emit('d', "opp");
+    } else if(key == "39" && running && live(me.id) && findSnake(me.id).d != "venstre"){
+      me.emit('d', "høyre");
+    } else if(key == "40" && running && live(me.id) && findSnake(me.id).d != "opp"){
+      me.emit('d', "ned");
     }
   });
 
-  $('#start').click(function(){
-    console.log("start button clicked");
+  $(document).on("click", "#start", function(e) {
+    //console.log("start button clicked");
     if(running) {
       apprise("Wait for the current game to end!", {}, function(r){
-        console.log('Waiting for the current game to end');
+        //console.log('Waiting for the current game to end');
   		});
     } else {
       if(snakes.length<2){
         apprise("Invite someone to play with you.</p><code>http://tckd.me</code>", {}, function(r){
-          console.log('Waiting for someone to join');
+          //console.log('Waiting for someone to join');
     		});
       } else {
         me.emit('status','ready');
-        // change start button to waiting for snakes ...
         $('#start').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner  fa-pulse"></i></button>');
       }
     }
+  });
+
+  $(document).on("click", ".me", function(e) {
+    updateSnakeName(findSnake(me.id).n);
+  });
+
+  $(window).on('resize', function(){
+    var win = $(this);
+    adjustWindow(win.height() - 4, win.width() - 154);
+    paintWorld();
+    paintCells();
   });
 
   function isMobile() {
@@ -253,14 +274,14 @@ $( document ).ready(function() {
     return false;
   }
 
-  function updateSnakeName(){
-    var ins = '</p><h1>Game Instructions</h1><p><strong>Controls</strong></p>';
-    ins += '<p> ↑ : up<br>';
-    ins += '<p> ↓ : down<br>';
-    ins += '<p> → : left<br>';
-    ins += '<p> ← : right<br>';
-    ins += '</p><p><strong>Enter your name</strong>';
-    apprise(ins, {'input':true,'animate':true, 'ok': 'Join', 'cancel':'Avbryt'}, function(r){
+  function updateSnakeName(name){
+    var ins = '</p><h1>Spill kontroll</h1>';
+    ins += '<p> ↑ : opp<br>';
+    ins += '<p> ↓ : ned<br>';
+    ins += '<p> → : venstre<br>';
+    ins += '<p> ← : høyre<br>';
+    ins += '</p><p><strong>Din slange navn</strong>';
+    apprise(ins, {'input':true,'animate':true, 'ok': 'Delta', 'cancel':'Avbryt', 'value':name}, function(r){
       if(r){
         // console.log('Ok button or enter');
         if(typeof(r)=='string'){
@@ -276,8 +297,8 @@ $( document ).ready(function() {
 // communications
 //-------------------
   me.on('connect', function() {
-    console.log("You'r connected: "+me.id);
-    updateSnakeName();
+    //console.log("You'r connected: "+me.id);
+    updateSnakeName(me.id.substr(0,7));
   });
 
   me.on('join', function(game){
@@ -293,7 +314,6 @@ $( document ).ready(function() {
 
   me.on('start', function(msg){
     if(typeof loop !=="undefined"){
-      console.log("typeof loop!==undefined: "+loop);
       clearInterval(loop);
     }
 
@@ -302,16 +322,17 @@ $( document ).ready(function() {
     snakes = msg;
     paintWorld();
     paintSnakes(snakes);
-    console.log("Game Started!");
-    $('#ready').replaceWith('<button id="run" class="primary-button pure-button"><i class="fa fa-spinner  fa-spin"></i></button>');
+    //console.log("Game Started!");
+    $('#ready').replaceWith('<button id="run" class="primary-button pure-button"><i class="fa fa-cog fa-spin"></i></button>');
     loop = setInterval(run, 100);
-    running=true
+    running=true;
   });
 
   me.on('d', function(snake){
     if(exists(snake.id)){
       var s = findSnake(snake.id);
       s.d = snake.d;
+      paintSnakeStatus(s);
     }
   });
 
@@ -330,13 +351,13 @@ $( document ).ready(function() {
       paintSnakeStatus(s);
       if(iWon()){
         me.emit('win');
-        console.log("I win: "+s.n);
+        //console.log("I win: "+s.n);
       }
     }
   });
 
   me.on('winner', function(snakeID){
-    console.log("Game is won by: "+snakeID);
+    //console.log("Game is won by: "+snakeID);
     var snake = findSnake(snakeID);
     snake.s = "won";
     paintSnakeStatus(snake);
@@ -344,7 +365,7 @@ $( document ).ready(function() {
     cells = [];
     running = false;
     counter=0;
-    $('#ready').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
+    $('#ready').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Revansj</button>');
     $('#run').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
   });
 

@@ -9,31 +9,28 @@
 $ node app.js
 ```
 
-  Then go to
+  Then open your browser to play
 ```web
 http://localhost:3000
 ```
 
-and follow instructions...
 
+## Features, Feature Requests, Bugs & Enhancements
 
-## Features
-  * Dynamic adjust to screen size
+### Features
+
   * Multiplayer mode - unlimited amount of players
-  * Single player mode - with levels and high score list (not implementd)
-  *
-
-## Bugs, Enhancements, Feature Requests
-
-### Bugs
-
-  * Restart new game not working
-  * Client code not running when window is not active!
-  * Start position
+  * Dynamic adjust to screen size when ever user resizes the screen
+  * Single player mode - with levels and high score list // TODO
+  * Command search functionality (Inspiration: atom.io) // TODO
 
 ### Enhancements
 
   * Invite other snake players
+  * Twitter, Facebook & linkedIn integration
+
+### Bugs
+  * Client code not running when window is not active, Possible to cheat, since snakes notifyes its dead.
 
 ### Feature Requests
 
@@ -44,8 +41,3 @@ and follow instructions...
   * Wiced sensor controllable
   * Command search functionality (Inspiration: atom.io)
   * Mobile support
-  *
-
-## License
-
-  [No License](LICENSE)

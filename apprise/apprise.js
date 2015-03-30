@@ -7,7 +7,8 @@ function apprise(string, args, callback) {
 		'yes' : 'Yes',
 		'no' : 'No',
 		'ok' : 'Ok',
-		'cancel' : 'Cancel'
+		'cancel' : 'Cancel',
+		'value' : 'Value'
 	}
 
 	if(args) {
@@ -44,7 +45,7 @@ function apprise(string, args, callback) {
 
 	if(args) {
     if(args['input']) {
-			$('.appriseInner').append('<div class="aInput"><input type="text" class="aTextbox" t="aTextbox" placeholder="Max length = 7" /></div>');
+			$('.appriseInner').append('<div class="aInput"><input type="text" class="aTextbox" t="aTextbox" placeholder="Maks lengde = 7" value="'+args['value']+'" /></div>');
 			$('.aTextbox').focus();
 		}
 	}
