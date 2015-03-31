@@ -41,3 +41,8 @@ http://localhost:3000
   * Wiced sensor controllable
   * Command search functionality (Inspiration: atom.io)
   * Mobile support
+### readme:
+
+http://www.reactivemanifesto.org
+http://12factor.net
+
