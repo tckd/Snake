@@ -29,6 +29,7 @@ http://localhost:3000
   * Twitter, Facebook & linkedIn integration
 
 ### Bugs
+
   * Client code not running when window is not active, Possible to cheat, since snakes notifyes its dead.
 
 ### Feature Requests
