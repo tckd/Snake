@@ -15,7 +15,6 @@
   <body>
     <div id="layout" class="content pure-g">
       <div id="nav" class="pure-u">
-        <!--a href="#" class="nav-menu-button">tckd</a-->
         <button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>
           <div class="pure-menu">
             <ul id="snakes" class="pure-menu-list">
@@ -33,7 +32,7 @@
 $( document ).ready(function() {
 
   if(isMobile()){
-    $('#status').replaceWith('<div id="status"><h1 id="support">Mobile is not supported!</h1></div>');
+    $('#status').replaceWith('<div id="status" class="warning"><h1>Mobile is not supported!</h1></div>');
     return;
   }
 
@@ -48,6 +47,7 @@ $( document ).ready(function() {
   adjustWindow(window.innerHeight - 4, window.innerWidth - 154);
 
   var me = io();
+
   var snakes = [];
   var cells = [];
   var running = false;
@@ -69,7 +69,6 @@ $( document ).ready(function() {
     }
   }
 
-
   function paintWorld(){
     canvas.width = w*cw;
     canvas.height = h*cw;
@@ -80,7 +79,6 @@ $( document ).ready(function() {
   }
 
   function run() {
-    //console.log(counter++);
     paintCells();
     moveAllLiveSnakes();
   }
@@ -198,18 +196,18 @@ $( document ).ready(function() {
     $("#snakes").empty();
     for(var i = 0; i < snakes.length; i++){
       if(snakes[i].id==me.id){
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].n+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].n+'</a>'));
       } else {
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].n+' <span class=\"direction\">- '+snakes[i].d+'</span></a>'));
+        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].n+'</a>'));
       }
     }
   }
 
   function paintSnakeStatus(s){
     if(s.id==me.id){
-      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.n+' <span class=\"direction\">- '+s.d+'</span></a>');
+      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.n+'</a>');
     } else {
-      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.n+' <span class=\"direction\">- '+s.d+'</span></a>');
+      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.n+'</a>');
     }
   }
 
@@ -280,7 +278,7 @@ $( document ).ready(function() {
     ins += '<p> ↓ : ned<br>';
     ins += '<p> → : venstre<br>';
     ins += '<p> ← : høyre<br>';
-    ins += '</p><p><strong>Din slange navn</strong>';
+    ins += '</p><p><strong>Ditt slange navn</strong>';
     apprise(ins, {'input':true,'animate':true, 'ok': 'Delta', 'cancel':'Avbryt', 'value':name}, function(r){
       if(r){
         // console.log('Ok button or enter');
@@ -293,12 +291,12 @@ $( document ).ready(function() {
 		});
   }
 
-//-------------------
-// communications
-//-------------------
+  //-------------------
+  // communications
+  //-------------------
   me.on('connect', function() {
     //console.log("You'r connected: "+me.id);
-    updateSnakeName(me.id.substr(0,7));
+    updateSnakeName(me.id.substr(0,10));
   });
 
   me.on('join', function(game){
@@ -332,7 +330,6 @@ $( document ).ready(function() {
     if(exists(snake.id)){
       var s = findSnake(snake.id);
       s.d = snake.d;
-      paintSnakeStatus(s);
     }
   });
 
@@ -366,6 +363,7 @@ $( document ).ready(function() {
     running = false;
     counter=0;
     $('#ready').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Revansj</button>');
+
     $('#run').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
   });
 

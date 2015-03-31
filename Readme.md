@@ -14,7 +14,6 @@ $ node app.js
 http://localhost:3000
 ```
 
-
 ## Features, Feature Requests, Bugs & Enhancements
 
 ### Features
@@ -41,12 +40,12 @@ http://localhost:3000
   * Wiced sensor controllable
   * Command search functionality (Inspiration: atom.io)
   * Mobile support
-  
+
 ## Architecture
 
 ### V1 (current) - Logic is running in clients
 
-  It leads to major inconsistency issues due to latency in multiplayer mood.
+  Design/Architectural flaws! Major inconsistency issues, as a result of latency
 
 ### V2 (To be) - Logic is executed in Server
 
@@ -60,20 +59,19 @@ Use webRTC in order to make one of the players the master.
 Now possible to run multiple games at the same time.
 
 ### Inpirations to architectural approaches
+
   * Reactive Systems - http://www.reactivemanifesto.org
 ```web
 systems that are:
  - Responsive
- - Resilient 
+ - Resilient
  - Elastic
 - Message Driven
 
 benefits: systems that are more:
-  - flexible, 
+  - flexible,
   - loosely-coupled
   - scalable
 ```
 
-
   * http://12factor.net
-

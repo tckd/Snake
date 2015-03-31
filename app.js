@@ -39,7 +39,7 @@ var game = {
 };
 
 function createSnake(id){
-  return {"id":id, "n":id.substr(0, 7), "d":"høyre", "s":"init", "c":{"x":10,"y":5}};
+  return {"id":id, "n":id.substr(0, 10), "d":"høyre", "s":"init", "c":{"x":10,"y":5}};
 }
 
 function resetSnakes(){
