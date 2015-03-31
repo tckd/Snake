@@ -45,7 +45,14 @@ http://localhost:3000
 
 ### V1 (current) - Logic is running in clients
 
-  Design/Architectural flaws! Major inconsistency issues, as a result of latency
+Design flaws with current Architecture:
+
+  * Major inconsistency issues, as a result of latency
+  * Client code not running when window is not active, Possible to cheat, since snakes notifies its dead.
+  * Only one game instance at a time
+
+Benefits of current Architecture
+  * Scalable, due to less computation on server.
 
 ### V2 (To be) - Logic is executed in Server
 
