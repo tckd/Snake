@@ -60,6 +60,20 @@ Use webRTC in order to make one of the players the master.
 Now possible to run multiple games at the same time.
 
 ### Inpirations to architectural approaches
-  * http://www.reactivemanifesto.org
+  * Reactive Systems - http://www.reactivemanifesto.org
+```web
+systems that are:
+ - Responsive
+ - Resilient 
+ - Elastic
+- Message Driven
+
+benefits: systems that are more:
+  - flexible, 
+  - loosely-coupled
+  - scalable
+```
+
+
   * http://12factor.net
 
