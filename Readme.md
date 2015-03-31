@@ -41,8 +41,25 @@ http://localhost:3000
   * Wiced sensor controllable
   * Command search functionality (Inspiration: atom.io)
   * Mobile support
-### readme:
+  
+## Architecture
 
-http://www.reactivemanifesto.org
-http://12factor.net
+### V1 (current) - Logic is running in clients
+
+  It leads to major inconsistency issues due to latency in multiplayer mood.
+
+### V2 (To be) - Logic is executed in Server
+
+Theoretically (to be tested), it will solve the inconsistency issues, however there will still be miner latancy issues
+
+This will lead to greate stress on server resources...
+
+### V3 (Todo) - Master-slaves on clients
+
+Use webRTC in order to make one of the players the master.
+Now possible to run multiple games at the same time.
+
+### Inpirations to architectural approaches
+  * http://www.reactivemanifesto.org
+  * http://12factor.net
 
