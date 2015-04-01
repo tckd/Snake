@@ -6,6 +6,7 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 
 app.use(express.static(__dirname, 'css'));
+app.use(express.static(__dirname, 'js'));
 app.use(express.static(__dirname, 'apprise'));
 app.use(express.static(__dirname, 'img'));
 
@@ -13,7 +14,6 @@ app.use(express.static(__dirname, 'img'));
 app.get('/', function(req, res){
   res.sendFile(__dirname + 'index.html');
 });
-
 
 // There are many useful environment variables available in process.env.
 // VCAP_APPLICATION contains useful information about a deployed application.
@@ -35,7 +35,12 @@ server.listen(port, host);
 console.log('listening on *' + port);
 
 var game = {
-  'running':false, 'snakes':[], 'waiting':[]
+  'running':false,
+  'snakes':[],
+  'waiting':[],
+  'cells':[],
+  'w':100,
+  'h':100
 };
 
 function createSnake(id){
@@ -43,20 +48,18 @@ function createSnake(id){
 }
 
 function resetSnakes(){
+  // move all waiting snakes to game snakes
   for(var i = 0; i<game.waiting.length;i++){
     game.snakes.push(game.waiting[i]);
   }
   game.waiting = [];
 
   var nrSnakes = game.snakes.length;
-  //console.log("nr of snakes: "+nrSnakes);
   var space = Math.floor(100/(nrSnakes+1));
-  //console.log("distance bettween snakes: "+space);
   for(var i = 0; i < nrSnakes; i++){
     game.snakes[i].d="høyre";
     game.snakes[i].c.x = 10;
     game.snakes[i].c.y = space*i + space;
-    //console.log("Positions: "+JSON.stringify(game.snakes[i].c));
   }
 }
 
@@ -65,8 +68,6 @@ function resetSnakesStatus(){
     game.snakes[i].s="init";
   }
 }
-
-
 
 function isAllSnakesReady(){
   for(var i = 0; i<game.snakes.length; i++){
@@ -111,13 +112,92 @@ function findSnake(snakeID){
   return;
 }
 
-/*
+function tic(){
+  for(var index in game.snakes) {
+    var snake = game.snakes[index];
+    move(snake);
+
+    if(checkCollision(snake)){
+      snake.s ="dead";
+      io.emit('changed',snake);
+
+      if(haveAWinner()){
+        var s = getWinner();
+        s.s = "won";
+        io.emit('changed', snake);
+
+        clearInterval(loop);
+
+        resetSnakes();
+        resetSnakesStatus();
+        return;
+      }
+    } else {
+      var c = {'x':snake.c.x, 'y':snake.c.y}
+      game.cells.push(c);
+    }
+  }
+  console.log(loop);
+  io.emit('tic',game);
+}
+
+function move(snake){
+  if(snake.d == "høyre"){
+    snake.c.x++;
+  } else if(snake.d == "venstre"){
+    snake.c.x--;
+  } else if(snake.d == "opp"){
+    snake.c.y--;
+  } else if(snake.d == "ned") {
+    snake.c.y++;
+  }
+}
+
+function haveAWinner(){
+  var nrLiveSnakes = 0;
+  for(var i = 0; i<game.snakes.length; i++){
+    if(game.snakes[i].s=="ready"){
+      nrLiveSnakes++;
+    }
+  }
+  if(nrLiveSnakes==1){
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function getWinner(){
+  for(var i = 0; i<game.snakes.length; i++){
+    if(game.snakes[i].s=="won"){
+      return game.snakes[i];
+    }
+  }
+  return {};
+}
+
+function checkCollision(snake) {
+  var x = snake.c.x;
+  var y = snake.c.y;
+  if(x == -1 || x == game.w || y == -1 || y == game.h){
+    return true;
+  }
+
+  for(var i = 0; i < game.cells.length; i++) {
+    var c = game.cells[i];
+    if(c.x == x && c.y == y){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+/*-----------
 Communication
-*/
-
+-----------*/
 io.on('connection', function(client){
-  //console.log('Snake with id '+client.id+' is connected');
-
+  console.log('Snake with id '+client.id+' is connected');
   var snake = createSnake(client.id);
   if(!game.running){
     game.snakes.push(snake);
@@ -126,48 +206,35 @@ io.on('connection', function(client){
   }
   io.emit('join', game);
 
+  client.on('direction', function(direction){
+    findSnake(client.id).d = direction;
+  });
+
   client.on('disconnect', function(){
     var snake = findSnake(client.id);
     snake.s = "disconnected";
+    io.emit('changed', snake);
     removeSnake(client.id);
-    io.emit('status', snake);
   });
 
   client.on('name', function(name){
-    //console.log('Snake with id '+client.id+' changed name to '+name);
     var snake = findSnake(client.id);
     snake.n = name;
-    io.emit('name', snake);
-  });
-
-  client.on('d', function(direction){
-    //console.log('Snake with id '+client.id+' changed direction to '+direction);
-    var snake = findSnake(client.id);
-    snake.d = direction;
-    io.emit('d', snake);
+    io.emit('changed', snake);
   });
 
   client.on('status', function(status){
-    //console.log('Snake with id '+client.id+' changed status to '+status);
     var snake = findSnake(client.id);
     snake.s = status;
-    io.emit('status', snake);
-    if(status=="ready" && isAllSnakesReady() && !game.running){
+    io.emit('changed', snake);
+    if(isAllSnakesReady() && !game.running){
       resetSnakes();
       game.running = true;
-      io.emit('start', game.snakes);
+      io.emit('start', game);
+      if(typeof loop !=="undefined"){
+        clearInterval(loop);
+      }
+      loop = setInterval(tic, 100);
     }
   });
-
-  client.on('win', function(){
-    //console.log('Snake with id '+client.id+' Won!');
-    game.running = false;
-    resetSnakesStatus();
-    io.emit('winner', client.id);
-  });
-
-  client.on('snakes', function () {
-    io.emit('snakes', snakes);
-  });
-
 });
