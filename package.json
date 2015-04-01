@@ -1,6 +1,6 @@
 {
   "name": "SnakeRide",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "A multiplayer Snake/Ride game",
 	"scripts": {
 		"start": "node app.js"

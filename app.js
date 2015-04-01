@@ -120,16 +120,16 @@ function tic(){
     if(checkCollision(snake)){
       snake.s ="dead";
       io.emit('changed',snake);
-
       if(haveAWinner()){
         var s = getWinner();
         s.s = "won";
-        io.emit('changed', snake);
-
+        io.emit('changed', s);
         clearInterval(loop);
-
+        console.log(JSON.stringify(game));
+        console.log("Before reset");
         resetSnakes();
         resetSnakesStatus();
+        console.log(JSON.stringify(game));
         return;
       }
     } else {
@@ -169,7 +169,7 @@ function haveAWinner(){
 
 function getWinner(){
   for(var i = 0; i<game.snakes.length; i++){
-    if(game.snakes[i].s=="won"){
+    if(game.snakes[i].s=="ready"){
       return game.snakes[i];
     }
   }
