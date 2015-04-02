@@ -43,11 +43,13 @@ var game = {
   'h':100
 };
 
+var loop;
+
 function createSnake(id){
   return {"id":id, "n":id.substr(0, 10), "d":"høyre", "s":"init", "c":{"x":10,"y":5}};
 }
 
-function resetSnakes(){
+function resetGame(){
   // move all waiting snakes to game snakes
   for(var i = 0; i<game.waiting.length;i++){
     game.snakes.push(game.waiting[i]);
@@ -61,12 +63,8 @@ function resetSnakes(){
     game.snakes[i].c.x = 10;
     game.snakes[i].c.y = space*i + space;
   }
-}
 
-function resetSnakesStatus(){
-  for(var i = 0; i < game.snakes.length; i++){
-    game.snakes[i].s="init";
-  }
+  game.cells = [];
 }
 
 function isAllSnakesReady(){
@@ -109,28 +107,23 @@ function findSnake(snakeID){
       return game.snakes[i];
     }
   }
-  return;
 }
 
 function tic(){
   for(var index in game.snakes) {
     var snake = game.snakes[index];
     move(snake);
-
-    if(checkCollision(snake)){
+    var colided = checkCollision(snake);
+    if(colided){
       snake.s ="dead";
       io.emit('changed',snake);
       if(haveAWinner()){
         var s = getWinner();
         s.s = "won";
         io.emit('changed', s);
+        game.running = false;
         clearInterval(loop);
-        console.log(JSON.stringify(game));
-        console.log("Before reset");
-        resetSnakes();
-        resetSnakesStatus();
-        console.log(JSON.stringify(game));
-        return;
+        console.log("Game ended: "+JSON.stringify(game));
       }
     } else {
       var c = {'x':snake.c.x, 'y':snake.c.y}
@@ -221,16 +214,19 @@ io.on('connection', function(client){
     var snake = findSnake(client.id);
     snake.n = name;
     io.emit('changed', snake);
+    console.log('Snake with id '+client.id+' changed name: '+name);
   });
 
   client.on('status', function(status){
     var snake = findSnake(client.id);
     snake.s = status;
     io.emit('changed', snake);
+    console.log('Status changed: '+JSON.stringify(snake));
     if(isAllSnakesReady() && !game.running){
-      resetSnakes();
+      resetGame();
       game.running = true;
       io.emit('start', game);
+      console.log('Game started: '+JSON.stringify(game));
       if(typeof loop !=="undefined"){
         clearInterval(loop);
       }
