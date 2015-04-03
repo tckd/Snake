@@ -14,6 +14,19 @@ $ node app.js
 http://localhost:3000
 ```
 
+## Game states
+![tckd logo](img/states.png)
+
+```bash
+init -> ready [user - explicit]
+ready -> run [server - automatic]
+run -> dead [server - automatic]
+run -> won [server - automatic]
+dead -> init [user - explicit]
+won -> init [user - explicit]
+```
+
+
 ## Features, Feature Requests, Bugs & Enhancements
 
 ### Features

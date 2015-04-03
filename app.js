@@ -112,22 +112,24 @@ function findSnake(snakeID){
 function tic(){
   for(var index in game.snakes) {
     var snake = game.snakes[index];
-    move(snake);
-    var colided = checkCollision(snake);
-    if(colided){
-      snake.s ="dead";
-      io.emit('changed',snake);
-      if(haveAWinner()){
-        var s = getWinner();
-        s.s = "won";
-        io.emit('changed', s);
-        game.running = false;
-        clearInterval(loop);
-        console.log("Game ended: "+JSON.stringify(game));
+    if(snake.s=="ready"){
+      move(snake);
+      var colided = checkCollision(snake);
+      if(colided){
+        snake.s ="dead";
+        io.emit('changed',snake);
+        if(haveAWinner()){
+          var s = getWinner();
+          s.s = "won";
+          io.emit('changed', s);
+          game.running = false;
+          clearInterval(loop);
+          console.log("Game ended: "+JSON.stringify(game));
+        }
+      } else {
+        var c = {'x':snake.c.x, 'y':snake.c.y}
+        game.cells.push(c);
       }
-    } else {
-      var c = {'x':snake.c.x, 'y':snake.c.y}
-      game.cells.push(c);
     }
   }
   console.log(loop);
