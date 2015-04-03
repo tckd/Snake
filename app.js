@@ -232,7 +232,7 @@ io.on('connection', function(client){
       if(typeof loop !=="undefined"){
         clearInterval(loop);
       }
-      loop = setInterval(tic, 100);
+      loop = setInterval(tic, 20);
     }
   });
 });
