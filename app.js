@@ -124,7 +124,7 @@ function tic(){
           io.emit('changed', s);
           game.running = false;
           clearInterval(loop);
-          console.log("Game ended: "+JSON.stringify(game));
+          //console.log("Game ended: "+JSON.stringify(game));
         }
       } else {
         var c = {'x':snake.c.x, 'y':snake.c.y}
@@ -132,7 +132,7 @@ function tic(){
       }
     }
   }
-  console.log(loop);
+  //console.log(loop);
   io.emit('tic',game);
 }
 
@@ -192,7 +192,7 @@ function checkCollision(snake) {
 Communication
 -----------*/
 io.on('connection', function(client){
-  console.log('Snake with id '+client.id+' is connected');
+  //console.log('Snake with id '+client.id+' is connected');
   var snake = createSnake(client.id);
   if(!game.running){
     game.snakes.push(snake);
@@ -216,23 +216,23 @@ io.on('connection', function(client){
     var snake = findSnake(client.id);
     snake.n = name;
     io.emit('changed', snake);
-    console.log('Snake with id '+client.id+' changed name: '+name);
+    //console.log('Snake with id '+client.id+' changed name: '+name);
   });
 
   client.on('status', function(status){
     var snake = findSnake(client.id);
     snake.s = status;
     io.emit('changed', snake);
-    console.log('Status changed: '+JSON.stringify(snake));
+    //console.log('Status changed: '+JSON.stringify(snake));
     if(isAllSnakesReady() && !game.running){
       resetGame();
       game.running = true;
       io.emit('start', game);
-      console.log('Game started: '+JSON.stringify(game));
+      //console.log('Game started: '+JSON.stringify(game));
       if(typeof loop !=="undefined"){
         clearInterval(loop);
       }
-      loop = setInterval(tic, 20);
+      loop = setInterval(tic, 40);
     }
   });
 });

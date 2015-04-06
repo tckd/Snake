@@ -1,6 +1,6 @@
 [![tckd logo](img/tckd.png)](http://tckd.me/)
 
-  A multiplayer Snake game powered by Nodejs
+  A multiplayer Snake game
 
 ## Running
 
@@ -39,7 +39,7 @@ won -> init [user - explicit]
   * Twitter, Facebook & linkedIn integration
 
 ### Bugs
-
+  * How to run multiple versions of app on bluemix?
   * Client code not running when window is not active, Possible to cheat, since snakes notifyes its dead.
 
 ### Feature Requests
@@ -76,5 +76,19 @@ Use webRTC in order to make one of the players the master.
 Now possible to run multiple games at the same time.
 
 ### Inpirations to architectural approaches
+
+  * Reactive Systems - http://www.reactivemanifesto.org
+```web
+systems that are:
+ - Responsive
+ - Resilient
+ - Elastic
+- Message Driven
+
+benefits: systems that are more:
+  - flexible,
+  - loosely-coupled
+  - scalable
+```
 
   * http://12factor.net
