@@ -39,7 +39,7 @@ won -> init [user - explicit]
   * Twitter, Facebook & linkedIn integration
 
 ### Bugs
-  * How to run multiple versions of app on bluemix?
+
   * Client code not running when window is not active, Possible to cheat, since snakes notifyes its dead.
 
 ### Feature Requests
@@ -53,22 +53,23 @@ won -> init [user - explicit]
 
 ## Architecture
 
-### V1 (current) - Logic is running in clients
+### V1 - Logic is running in clients
 
-Design flaws with current Architecture:
+Design flaws with v1 version:
 
   * Major inconsistency issues, as a result of latency
   * Client code not running when window is not active, Possible to cheat, since snakes notifies its dead.
   * Only one game instance at a time
 
-Benefits of current Architecture
+Architectural benefits of v1:
+
   * Scalable, due to less computation on server.
 
-### V2 (To be) - Logic is executed in Server
+### V2 (current) - Logic is executed in Server
 
 Theoretically (to be tested), it will solve the inconsistency issues, however there will still be miner latancy issues
 
-This will lead to greate stress on server resources...
+This will lead to stress on server resources...
 
 ### V3 (Todo) - Master-slaves on clients
 
@@ -76,19 +77,5 @@ Use webRTC in order to make one of the players the master.
 Now possible to run multiple games at the same time.
 
 ### Inpirations to architectural approaches
-
-  * Reactive Systems - http://www.reactivemanifesto.org
-```web
-systems that are:
- - Responsive
- - Resilient
- - Elastic
-- Message Driven
-
-benefits: systems that are more:
-  - flexible,
-  - loosely-coupled
-  - scalable
-```
 
   * http://12factor.net
