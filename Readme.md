@@ -14,14 +14,24 @@ $ node app.js
 http://localhost:3000
 ```
 
+## Game states
+![tckd logo](img/states.png)
+
+```bash
+init -> ready [user - explicit]
+ready -> run [server - automatic]
+run -> dead [server - automatic]
+run -> won [server - automatic]
+dead -> init [user - explicit]
+won -> init [user - explicit]
+```
+
 ## Features, Feature Requests, Bugs & Enhancements
 
 ### Features
 
   * Multiplayer mode - unlimited amount of players
   * Dynamic adjust to screen size when ever user resizes the screen
-  * Single player mode - with levels and high score list // TODO
-  * Command search functionality (Inspiration: atom.io) // TODO
 
 ### Enhancements
 
@@ -29,17 +39,16 @@ http://localhost:3000
   * Twitter, Facebook & linkedIn integration
 
 ### Bugs
-
+  * How to run multiple versions of app on bluemix?
   * Client code not running when window is not active, Possible to cheat, since snakes notifyes its dead.
 
 ### Feature Requests
-
   * Single player mode
   * Levels for single player mode
   * Ability to create custom levels/world
   * High score list for single player mode
-  * Wiced sensor controllable
   * Command search functionality (Inspiration: atom.io)
+  * Wiced sensor controllable
   * Mobile support
 
 ## Architecture

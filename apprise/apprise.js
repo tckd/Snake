@@ -75,9 +75,8 @@ function apprise(string, args, callback) {
 
 	var aText = false;
 	$('.aTextbox').keyup(function() {
-		aText = $(this).val().substr(0, 7);
+		aText = $(this).val().substr(0, 10);
 	});
-
 
   $('.aButtons > button').click(function() {
     $('.appriseOverlay').remove();

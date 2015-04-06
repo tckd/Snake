@@ -1,0 +1,11 @@
+{
+  "running":true,
+  "snakes":[
+    {"id":"AikFg5BM4NJNBCxcAAAA","n":"Test","d":"høyre","s":"ready","c":{"x":10,"y":33}},
+    {"id":"ofMf7VqUbmVtXl1sAAAC","n":"Habib","d":"høyre","s":"ready","c":{"x":10,"y":66}}
+  ],
+  "waiting":[],
+  "cells":[{"x":11,"y":66}],
+  "w":100,
+  "h":100
+}

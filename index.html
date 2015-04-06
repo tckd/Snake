@@ -15,12 +15,12 @@
   <body>
     <div id="layout" class="content pure-g">
       <div id="nav" class="pure-u">
-        <button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>
-          <div class="pure-menu">
-            <ul id="snakes" class="pure-menu-list">
-              <!-- Added by js -->
-            </ul>
-          </div>
+        <button id="init" class="primary-button pure-button"><i class="fa fa-motorcycle"></i>&nbsp; Start</button>
+        <div class="pure-menu">
+          <ul id="snakes" class="pure-menu-list">
+            <!-- Added by js -->
+          </ul>
+        </div>
       </div>
       <div id="main" class="pure-u-1">
         <div id="status"></div>
@@ -30,231 +30,10 @@
   </body>
 <script>
 $( document ).ready(function() {
-
   if(isMobile()){
     $('#status').replaceWith('<div id="status" class="warning"><h1>Mobile is not supported!</h1></div>');
     return;
   }
-
-  var bodyColor = "rgb(150, 150, 150)";
-  var borderColor = "rgb(37, 42, 58)";
-
-  var canvas = $("#canvas")[0];
-  var ctx = canvas.getContext("2d");
-  var w = 100;
-  var h = 100;
-  var cw = 5; // default
-  adjustWindow(window.innerHeight - 4, window.innerWidth - 154);
-
-  var me = io();
-
-  var snakes = [];
-  var cells = [];
-  var running = false;
-  var loop;
-  var counter = 0;
-
-
-  function adjustWindow(hight,width){
-    var dcw = Math.floor(width/w);
-    var dch = Math.floor(hight/h);
-    if(dcw<dch){
-      if(dcw > 5){
-        cw = dcw;
-      }
-    } else {
-      if(dch > 5){
-        cw = dch;
-      }
-    }
-  }
-
-  function paintWorld(){
-    canvas.width = w*cw;
-    canvas.height = h*cw;
-    ctx.fillStyle = "rgb(37, 42, 58)";
-    ctx.fillRect(0, 0, w*cw, h*cw);
-    ctx.strokeStyle = "rgb(150, 150, 150)";
-    ctx.strokeRect(0, 0, w*cw, h*cw);
-  }
-
-  function run() {
-    paintCells();
-    moveAllLiveSnakes();
-  }
-
-  function moveAllLiveSnakes() {
-    for(var i = 0; i < snakes.length; i++){
-      var p = snakes[i];
-      if(p.s=="ready"){ // only live snakes can move
-        move(p);
-        if(p.id==me.id){ // only check my collision
-          if(checkCollision(p)){
-            me.emit('status','crashed');// Broadcast my collision
-            $('#run').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner fa-pulse"></i></button>');
-          }
-        }
-        cells.push({"x": p.c.x, "y": p.c.y});
-      }
-    }
-  }
-
-  function move(snake) {
-    if(snake.d == "høyre"){
-      snake.c.x++;
-    } else if(snake.d == "venstre"){
-      snake.c.x--;
-    } else if(snake.d == "opp"){
-      snake.c.y--;
-    } else if(snake.d == "ned") {
-      snake.c.y++;
-    }
-    // paint the head of my snake
-    if(snake.id==me.id){
-      paintCell(snake.c.x,snake.c.y,"rgb(0, 153, 0)","rgb(0, 153, 0)");
-    }
-  }
-
-  function checkCollision(snake) {
-    var x = snake.c.x;
-    var y = snake.c.y;
-    if(x == -1 || x == w || y == -1 || y == h){
-      return true;
-    }
-
-    for(var i = 0; i < cells.length; i++) {
-      var c = cells[i];
-      if(c.x == x && c.y == y){
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function paintCells() {
-    for(var i = 0; i < cells.length; i++) {
-      paintCell(cells[i].x,cells[i].y,bodyColor,borderColor);
-    }
-  }
-
-  function paintCell(x,y,fc,sc){
-    ctx.fillStyle = fc;
-    ctx.fillRect(x*cw, y*cw, cw, cw);
-    ctx.strokeStyle = sc;
-    ctx.strokeRect(x*cw, y*cw, cw, cw);
-  }
-
-  function exists(snakeID){
-    for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].id==snakeID) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function live(snakeID){
-    for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].id==snakeID && snakes[i].s=="ready") {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  function findSnake(snakeID){
-    for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].id==snakeID) {
-        return snakes[i];
-      }
-    }
-    return;
-  }
-
-  function iWon(){
-    if(!running){
-      return false;
-    }
-    var nrLiveSnakes = 0;
-    var iLive = false;
-    for(var i = 0; i<snakes.length; i++){
-      if(snakes[i].s=="ready"){
-        nrLiveSnakes++;
-        if(snakes[i].id==me.id){
-          iLive = true;
-        }
-      }
-    }
-    if(nrLiveSnakes==1 && iLive){
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  function paintSnakes(snakes){
-    $("#snakes").empty();
-    for(var i = 0; i < snakes.length; i++){
-      if(snakes[i].id==me.id){
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+snakes[i].s+'\">'+snakes[i].n+'</a>'));
-      } else {
-        $("#snakes").append($('<li id=\"'+snakes[i].id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+snakes[i].s+'\">'+snakes[i].n+'</a>'));
-      }
-    }
-  }
-
-  function paintSnakeStatus(s){
-    if(s.id==me.id){
-      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.n+'</a>');
-    } else {
-      $('#'+s.id).html('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.n+'</a>');
-    }
-  }
-
-  $(document).keydown(function(e){
-    var key = e.which;
-
-    if(key == "56"){ // 8 - get list of snakes
-      me.emit('snakes');
-    } else if(key == "37" && running && live(me.id) && findSnake(me.id).d != "høyre"){
-      me.emit('d', "venstre");
-    } else if(key == "38" && running && live(me.id) && findSnake(me.id).d != "ned"){
-      me.emit('d', "opp");
-    } else if(key == "39" && running && live(me.id) && findSnake(me.id).d != "venstre"){
-      me.emit('d', "høyre");
-    } else if(key == "40" && running && live(me.id) && findSnake(me.id).d != "opp"){
-      me.emit('d', "ned");
-    }
-  });
-
-  $(document).on("click", "#start", function(e) {
-    //console.log("start button clicked");
-    if(running) {
-      apprise("Wait for the current game to end!", {}, function(r){
-        //console.log('Waiting for the current game to end');
-  		});
-    } else {
-      if(snakes.length<2){
-        apprise("Invite someone to play with you.</p><code>http://tckd.me</code>", {}, function(r){
-          //console.log('Waiting for someone to join');
-    		});
-      } else {
-        me.emit('status','ready');
-        $('#start').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner  fa-pulse"></i></button>');
-      }
-    }
-  });
-
-  $(document).on("click", ".me", function(e) {
-    updateSnakeName(findSnake(me.id).n);
-  });
-
-  $(window).on('resize', function(){
-    var win = $(this);
-    adjustWindow(win.height() - 4, win.width() - 154);
-    paintWorld();
-    paintCells();
-  });
 
   function isMobile() {
     if (sessionStorage.desktop){
@@ -272,7 +51,147 @@ $( document ).ready(function() {
     return false;
   }
 
-  function updateSnakeName(name){
+  var game = {
+    'bodyColor': "rgb(150, 150, 150)",
+    'borderColor': "rgb(37, 42, 58)",
+    'canvas': $("#canvas")[0],
+    'ctx': canvas.getContext("2d"),
+    'w': 100,
+    'h': 100,
+    'cw': 5, // default
+		'snakes': [], // all the sankes
+    'cells': [], // world cells
+    'running': false
+	}
+  adjustWindow(window.innerHeight - 4, window.innerWidth - 154);
+  var me = io();
+
+  function findSnake(snakeID){
+    for(var i = 0; i<game.snakes.length; i++){
+			var snake = game.snakes[i];
+			if(snake.id==snakeID) {
+				return snake;
+	    }
+	  }
+    return {};
+  }
+
+  function adjustWindow(hight,width){
+    var dcw = Math.floor(width/game.w);
+    var dch = Math.floor(hight/game.h);
+    if(dcw<dch){
+      if(dcw > 5){
+        game.cw = dcw;
+      }
+    } else {
+      if(dch > 5){
+        game.cw = dch;
+      }
+    }
+  }
+
+	function updateSnake(snake){
+		for(var i = 0; i<game.snakes.length; i++){
+			var s = game.snakes[i];
+			if(s.id==snake.id) {
+				game.snakes[i] = snake;
+				return;
+	    }
+	  }
+	}
+
+  function paintWorld(){
+    game.canvas.width = game.w*game.cw;
+    game.canvas.height = game.h*game.cw;
+
+    game.ctx.fillStyle = "rgb(37, 42, 58)";
+    game.ctx.fillRect(0, 0, game.w*game.cw, game.h*game.cw);
+
+    game.ctx.strokeStyle = "rgb(150, 150, 150)";
+    game.ctx.strokeRect(0, 0, game.w*game.cw, game.h*game.cw);
+  }
+
+	function paintCells() {
+    for(var i = 0; i < game.cells.length; i++) {
+      paintCell(game.cells[i].x,game.cells[i].y,game.bodyColor,game.borderColor);
+    }
+  }
+
+	function paintCell(x,y,fc,sc){
+    game.ctx.fillStyle = fc;
+    game.ctx.fillRect(x*game.cw, y*game.cw, game.cw, game.cw);
+    game.ctx.strokeStyle = sc;
+    game.ctx.strokeRect(x*game.cw, y*game.cw, game.cw, game.cw);
+  }
+
+  function paintSnakes(){
+    $("#snakes").empty();
+    for(var i = 0; i < game.snakes.length; i++){
+      var s = game.snakes[i];
+      if(s.id==me.id){
+        $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link me '+s.s+'\">'+s.n+'</a>'));
+      } else {
+        $("#snakes").append($('<li id=\"'+s.id+'\">').append('<a href=\"#\" class=\"pure-menu-link '+s.s+'\">'+s.n+'</a>'));
+      }
+    }
+  }
+
+  function repaintSnake(snake){
+    if(snake.id==me.id){
+      $('#'+snake.id).html('<a href=\"#\" class=\"pure-menu-link me '+snake.s+'\">'+snake.n+'</a>');
+    } else {
+      $('#'+snake.id).html('<a href=\"#\" class=\"pure-menu-link '+snake.s+'\">'+snake.n+'</a>');
+    }
+  }
+
+  /*------
+  controls
+  ------*/
+  $(document).keydown(function(e){
+    var key = e.which;
+    if(game.running){
+      var m = findSnake(me.id);
+
+      if(key == "37" && m.s == "ready" && m.d != "høyre"){
+        me.emit('direction', "venstre");
+      } else if(key == "38" && m.s == "ready" && m.d != "ned"){
+        me.emit('direction', "opp");
+      } else if(key == "39" && m.s == "ready" && m.d != "venstre"){
+        me.emit('direction', "høyre");
+      } else if(key == "40" && m.s == "ready" && m.d != "opp"){
+        me.emit('direction', "ned");
+      }
+    }
+  });
+
+  $(document).on("click", "#init", function(e) {
+    if(game.running) {
+      apprise("Wait for the current game to end!", {}, function(r){
+  		});
+    } else {
+      if(game.snakes.length<2){// contains bug (in case we have disconnected player)
+        apprise("Invite someone to play with you.</p><code>http://tckd.me</code>", {}, function(r){
+    		});
+      } else {
+        me.emit('status','ready');
+        $('#init').replaceWith('<button id="ready" class="primary-button pure-button"><i class="fa fa-spinner  fa-pulse"></i></button>');
+      }
+    }
+  });
+
+  $(document).on("click", ".me", function(e) {
+    var m = findSnake(me.id);
+    updateMyName(m.n);
+  });
+
+  $(window).on('resize', function(){
+    var win = $(this);
+    adjustWindow(win.height() - 4, win.width() - 154);
+    paintWorld();
+    paintCells();
+  });
+
+  function updateMyName(name){
     var ins = '</p><h1>Spill kontroll</h1>';
     ins += '<p> ↑ : opp<br>';
     ins += '<p> ↓ : ned<br>';
@@ -281,96 +200,60 @@ $( document ).ready(function() {
     ins += '</p><p><strong>Ditt slange navn</strong>';
     apprise(ins, {'input':true,'animate':true, 'ok': 'Delta', 'cancel':'Avbryt', 'value':name}, function(r){
       if(r){
-        // console.log('Ok button or enter');
-        if(typeof(r)=='string'){
-          me.emit('name',r);
-        }
-			} else {
-        // console.log('Cancel button');
-      }
+        me.emit('name',r);
+			}
 		});
   }
 
-  //-------------------
-  // communications
-  //-------------------
+  /*-----------
+  Communication
+  -----------*/
   me.on('connect', function() {
-    //console.log("You'r connected: "+me.id);
-    updateSnakeName(me.id.substr(0,10));
+    var s = {"id":me.id, "n": me.id.substr(0, 10), "d":"høyre", "s":"init", "c":{"x":10,"y":5}};
+    updateMyName(s.n);
   });
 
-  me.on('join', function(game){
-    running = game.running;
-    if(running){
-      // wait for the current game to end
+  me.on('join', function(msg){
+    if(msg.running){ // game is running on server
+      alert("wait for the current game to end"+JSON.stringify(msg));
     } else {
-      snakes = game.snakes;
+      game.snakes = msg.snakes;
       paintWorld();
-      paintSnakes(snakes);
+      paintSnakes();
     }
   });
 
   me.on('start', function(msg){
-    if(typeof loop !=="undefined"){
-      clearInterval(loop);
-    }
-
-    cells = [];
-    counter=0;
-    snakes = msg;
+    game.running=true;
+    game.snakes = msg.snakes;
     paintWorld();
-    paintSnakes(snakes);
-    //console.log("Game Started!");
+    paintSnakes();
     $('#ready').replaceWith('<button id="run" class="primary-button pure-button"><i class="fa fa-cog fa-spin"></i></button>');
-    loop = setInterval(run, 100);
-    running=true;
   });
 
-  me.on('d', function(snake){
-    if(exists(snake.id)){
-      var s = findSnake(snake.id);
-      s.d = snake.d;
+  // direction, status, name
+  me.on('changed', function(snake){
+    updateSnake(snake);
+    if(snake.s=="won"){
+      $('#run').replaceWith('<button id="init" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
+      $('#dead').replaceWith('<button id="init" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Restart</button>');
+      game.running = false;
+    } else if(snake.s=="dead" && snake.id==me.id){
+      $('#run').replaceWith('<button id="dead" class="primary-button pure-button"><i class="fa fa-ban text-danger"></i></button>');
     }
+    repaintSnake(snake);
   });
 
-  me.on('name',function(snake){
-    if(exists(snake.id)){
-      var s = findSnake(snake.id);
-      s.n = snake.n;
-      paintSnakeStatus(s);
-    }
+  me.on('tic', function(msg){
+    //console.log("World state: "+JSON.stringify(msg));
+    game.snakes = msg.snakes;
+    game.cells = msg.cells;
+    paintWorld();
+    paintCells();
+    // paint the head of my snake
+    var m = findSnake(me.id);
+    paintCell(m.c.x,m.c.y,"rgb(0, 153, 0)","rgb(0, 153, 0)");
   });
-
-  me.on('status',function(snake){
-    if(exists(snake.id)){
-      var s = findSnake(snake.id);
-      s.s = snake.s;
-      paintSnakeStatus(s);
-      if(iWon()){
-        me.emit('win');
-        //console.log("I win: "+s.n);
-      }
-    }
-  });
-
-  me.on('winner', function(snakeID){
-    //console.log("Game is won by: "+snakeID);
-    var snake = findSnake(snakeID);
-    snake.s = "won";
-    paintSnakeStatus(snake);
-    clearInterval(loop);
-    cells = [];
-    running = false;
-    counter=0;
-    $('#ready').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Revansj</button>');
-
-    $('#run').replaceWith('<button id="start" class="primary-button pure-button"><i class="fa fa-play-circle-o"></i>&nbsp; Start</button>');
-  });
-
-  me.on('snakes', function(snakes){
-    paintSnakes(snakes);
-  });
-
 });
 
 </script>
