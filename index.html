@@ -166,11 +166,11 @@ $( document ).ready(function() {
 
   $(document).on("click", "#init", function(e) {
     if(game.running) {
-      apprise("Wait for the current game to end!", {}, function(r){
+      apprise("Vente til spillet er ferdig spilt!", {}, function(r){
   		});
     } else {
       if(game.snakes.length<2){// contains bug (in case we have disconnected player)
-        apprise("Invite someone to play with you.</p><code>http://tckd.me</code>", {}, function(r){
+        apprise("Inviter noen å spille med deg!</p><code>http://tckd.me</code>", {}, function(r){
     		});
       } else {
         me.emit('status','ready');
@@ -215,7 +215,7 @@ $( document ).ready(function() {
 
   me.on('join', function(msg){
     if(msg.running){ // game is running on server
-      alert("wait for the current game to end"+JSON.stringify(msg));
+      alert("Vente til spillet er ferdig spilt!");
     } else {
       game.snakes = msg.snakes;
       paintWorld();
